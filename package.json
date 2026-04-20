@@ -5,8 +5,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "sh scripts/run_build_site.sh",
-    "vercel-build": "sh scripts/run_build_site.sh"
+    "build": "node scripts/run_build_site.mjs",
+    "vercel-build": "node scripts/run_build_site.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
