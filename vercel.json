@@ -8,5 +8,8 @@
     "api/**/*.js": {
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/admin/:path*", "destination": "/admin/index.html" }
+  ]
 }
