@@ -10,7 +10,9 @@ agent-tools
 
 # Not needed for `build_site.py` + Vercel serverless (website + admin)
 docs/
-scripts/
+scripts/*.py
+scripts/*.sh
+scripts/__pycache__/
 supabase/
 pipeline/admin/
 requirements-pipeline.txt
