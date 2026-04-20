@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "npm install && cd admin && npm install --legacy-peer-deps && cd .. && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
-  "buildCommand": ".venv/bin/python3 build_site.py",
+  "buildCommand": "sh scripts/run_build_site.sh",
   "outputDirectory": "public",
   "functions": {
     "api/**/*.js": {
