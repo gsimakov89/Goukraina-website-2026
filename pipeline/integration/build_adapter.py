@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pipeline.models.post import BlogPost, date_label, estimate_read_minutes
 from pipeline.services.post_service import PostService
+from pipeline.storage.json_repository import JsonPostRepository
 
 
 def _sync_derived_fields(post: BlogPost) -> BlogPost:
@@ -17,8 +18,14 @@ def _sync_derived_fields(post: BlogPost) -> BlogPost:
 
 def load_blog_for_build() -> tuple[list[dict[str, object]], dict[str, str]]:
     """Published posts only, sorted newest first — matches former BLOG_ENTRIES / BLOG_BODIES."""
-    svc = PostService()
-    posts = svc.published_for_build()
+    try:
+        svc = PostService()
+        posts = svc.published_for_build()
+    except Exception as e:
+        # CI / Vercel: bad SUPABASE_* or transient API errors must not fail the whole static build.
+        print("WARN: blog load from primary store failed, falling back to local JSON:", e)
+        svc = PostService(repository=JsonPostRepository.default())
+        posts = svc.published_for_build()
     entries: list[dict[str, object]] = []
     bodies: dict[str, str] = {}
     for p in posts:
