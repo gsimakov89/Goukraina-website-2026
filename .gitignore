@@ -1,7 +1,15 @@
 # Python
 .venv/
 venv/
+
+# Secrets and env files (keep .env.example as the template only)
 .env
+.env.*
+!.env.example
+*.pem
+*-credentials.json
+*-service-account.json
+
 __pycache__/
 *.pyc
 .Python
