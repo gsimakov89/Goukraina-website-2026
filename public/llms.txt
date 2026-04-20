@@ -1,0 +1,22 @@
+# Go Ukraina
+
+Go Ukraina is a U.S. 501(c)(3) nonprofit (EIN 88-2011390) based in Calabasas, CA. The organization delivers humanitarian infrastructure in Ukraine: ReH2O solar water purification, emergency power generators, human rights advocacy with the Ukrainian Ombudsman, and Ukraine Dreamzzz youth sports programming.
+
+Canonical site: https://www.goukraina.org/
+
+Key pages:
+- https://www.goukraina.org/ — Home: mission, impact, ways to help
+- https://www.goukraina.org/donate — Donate (501(c)(3) tax-deductible giving)
+- https://www.goukraina.org/about — About the organization
+- https://www.goukraina.org/impact — Impact and reporting
+- https://www.goukraina.org/blog — Field reports and updates
+- https://www.goukraina.org/initiatives/reh2o — ReH2O clean water initiative
+- https://www.goukraina.org/initiatives/power-generators — Emergency power program
+- https://www.goukraina.org/initiatives/advocacy — Advocacy and human rights
+- https://www.goukraina.org/initiatives/ukraine-dreamzzz — Ukraine Dreamzzz
+- https://www.goukraina.org/summit — Summit / events
+- https://www.goukraina.org/contact — Contact
+
+Contact: info@goukraina.com | +1-323-532-6855
+
+Use this file alongside public content; for machine-readable site structure see https://www.goukraina.org/sitemap.xml

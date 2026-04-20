@@ -1,0 +1,24 @@
+{
+  "slug": "ukraine-water-crisis-wash-cluster",
+  "title": "Addressing the Water Crisis in Ukraine: Go Ukraina and the WASH Cluster",
+  "desc": "Go Ukraina is partnering with the WASH Cluster to deploy solar-powered water purification stations across war-affected regions of Ukraine.",
+  "date": "2024-12-05",
+  "date_label": "December 5, 2024",
+  "read": 3,
+  "tags": [
+    "Water",
+    "ReH2O",
+    "WASH Cluster",
+    "Ukraine Crisis"
+  ],
+  "excerpt": "The ongoing conflict has severely disrupted clean water access across Ukraine. Go Ukraina is partnering with the WASH Cluster to deploy solar-powered purification stations.",
+  "cover": "reh2o/delivery-1.jpg",
+  "body_html": "\n        <p><em>Photo: Addressing the Water Crisis in Ukraine: Go Ukraina and the WASH Cluster</em></p>\n        <p>The ongoing conflict in Ukraine has targeted essential civilian infrastructure, creating a severe crisis for millions of people. Among the most critical challenges is the lack of access to safe, clean drinking water.</p>\n        <h2>The Scale of the Challenge</h2>\n        <p>According to recent reports, continuous strikes on power grids and municipal water systems have left entire regions relying on unsafe water sources or costly bottled water. This not only poses immediate health risks but also strains local economies already devastated by war.</p>\n        <h2>Our Partnership with the WASH Cluster</h2>\n        <p>Go Ukraina has officially joined forces with the Global WASH Cluster to coordinate our response. By aligning our efforts with international organizations and local authorities, we ensure our ReH2O solar-powered water purification units are deployed where they are needed most.</p>\n        <p>Our pilot programs in the Kyiv region have already proven that decentralized, renewable-powered water stations can provide a resilient lifeline for communities facing regular grid failures.</p>\n        <aside class=\"blog-mission-card\" aria-labelledby=\"mission-cta-heading\">\n          <p class=\"blog-mission-card__eyebrow\">Fund the Work</p>\n          <h2 id=\"mission-cta-heading\" class=\"blog-mission-card__title\">Support Our Mission</h2>\n          <p class=\"blog-mission-card__text\">Articles like this highlight the urgent need for action. 100% of your donation funds programs in Ukraine—water, power, advocacy, and field operations.</p>\n          <a class=\"btn btn-primary blog-mission-card__btn\" href=\"../../donate/index.html\" aria-label=\"Donate to fund programs in Ukraine\">Donate</a>\n        </aside>\n    ",
+  "status": "published",
+  "seo": {
+    "meta_title": "",
+    "meta_description": "",
+    "og_image": ""
+  },
+  "updated_at": ""
+}

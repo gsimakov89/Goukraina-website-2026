@@ -1,0 +1,32 @@
+# Python
+.venv/
+venv/
+.env
+__pycache__/
+*.pyc
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Admin SPA build output (rebuilt by `python3 build_site.py` → `npm run build` in admin/)
+public/admin/
+
+# Supabase CLI local state (never commit)
+supabase/.temp/
+
+# Cursor IDE (omit from Git; keep skills local or sync separately)
+.cursor/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

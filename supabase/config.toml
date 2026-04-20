@@ -1,0 +1,9 @@
+# Supabase local config — https://supabase.com/docs/guides/cli/config
+project_id = "lrbrvkhddhuebmyazgcf"
+
+[api]
+enabled = true
+
+[functions.site-api]
+# JWT verification is done in code (admin allowlist + app_metadata) to match Vercel api/_lib/admin_auth.mjs
+verify_jwt = false

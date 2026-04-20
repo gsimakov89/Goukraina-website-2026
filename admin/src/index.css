@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-serif: "Spectral", "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-uk-deep: oklch(28% 0.065 250);
+  --color-uk-mast: oklch(32% 0.07 252);
+  --color-uk-gold: oklch(62% 0.1 78);
+  --color-surface: oklch(99% 0.008 250);
+  --color-muted: oklch(45% 0.03 260);
+  --color-accent: oklch(48% 0.12 252);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--color-surface);
+  color: oklch(22% 0.035 260);
+}
+
+/* Quill in admin */
+.ql-editor {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  min-height: 280px;
+}
+
+.ql-toolbar.ql-snow {
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-color: oklch(88% 0.02 250);
+}
+
+.ql-container.ql-snow {
+  border-radius: 0 0 0.5rem 0.5rem;
+  border-color: oklch(88% 0.02 250);
+}

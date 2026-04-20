@@ -1,0 +1,19 @@
+# Smaller uploads; Vercel installs npm deps on the build machine.
+.venv
+venv
+__pycache__
+*.pyc
+.cursor
+.git
+agent-tools
+**/.DS_Store
+
+# Not needed for `build_site.py` + Vercel serverless (website + admin)
+docs/
+scripts/
+supabase/
+pipeline/admin/
+requirements-pipeline.txt
+ACTION-PLAN.md
+FULL-AUDIT-REPORT.md
+.impeccable.md

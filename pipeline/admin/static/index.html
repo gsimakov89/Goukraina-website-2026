@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blog admin · Go Ukraina</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+    <link href="/admin/admin.css?v=20260415b" rel="stylesheet" />
+  </head>
+  <body class="admin-app">
+    <div id="login-overlay" class="login-overlay" hidden>
+      <div class="login-card">
+        <h2>Sign in</h2>
+        <div id="login-supabase-panel" hidden>
+          <p id="login-config-hint" class="login-hint" hidden></p>
+          <p>
+            Sign in with Supabase (email and password). The account must be an admin: add their user id to
+            <code>admin_users</code> or set <code>app_metadata.admin: true</code> in the Supabase dashboard.
+          </p>
+          <label class="field">
+            <span>Email</span>
+            <input type="email" id="sb-email" class="field__input" autocomplete="username" />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input type="password" id="sb-password" class="field__input" autocomplete="current-password" />
+          </label>
+          <p class="login-card__row">
+            <button type="button" class="btn btn--primary" id="sb-login-btn">Sign in</button>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <header class="admin-header">
+      <div class="admin-header__brand">
+        <p class="admin-header__kicker">Go Ukraina</p>
+        <h1 class="admin-header__title">Field reports · CMS</h1>
+      </div>
+      <div class="admin-header__actions">
+        <button type="button" class="btn btn--ghost" id="btn-new-draft">+ New draft</button>
+        <button type="button" class="btn btn--ghost" id="btn-rebuild">Rebuild static site</button>
+        <button type="button" class="btn btn--ghost" id="btn-logout">Clear token</button>
+        <button type="button" class="btn btn--primary" id="btn-save">Save post</button>
+      </div>
+    </header>
+
+    <nav class="admin-workspace-nav" aria-label="Workspace">
+      <div class="admin-workspace-nav__inner">
+        <a href="#panel-posts" class="admin-workspace-nav__link">Posts</a>
+        <a href="#panel-editor" class="admin-workspace-nav__link">Article</a>
+        <a href="#panel-seo" class="admin-workspace-nav__link">SEO</a>
+      </div>
+    </nav>
+
+    <div class="admin-shell">
+      <aside id="panel-posts" class="admin-sidebar">
+        <h2>Posts</h2>
+        <ul class="post-list" id="post-list" aria-label="All posts"></ul>
+      </aside>
+      <main class="admin-main">
+        <div class="editor-workspace">
+          <div id="panel-editor" class="editor-column">
+            <div class="field-grid">
+              <label class="field">
+                <span>Title <span class="field-hint">(H1 on the published page)</span></span>
+                <input type="text" id="f-title" autocomplete="off" />
+              </label>
+              <div class="field-row">
+                <label class="field">
+                  <span>Publication date</span>
+                  <input type="date" id="f-date" />
+                </label>
+                <label class="field">
+                  <span>Status</span>
+                  <select id="f-status">
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
+                </label>
+              </div>
+              <div class="editor-wrap">
+                <span class="editor-wrap__label">Article body</span>
+                <div id="editor" aria-label="Article editor"></div>
+              </div>
+            </div>
+          </div>
+          <aside id="panel-seo" class="seo-rail" aria-label="SEO and social sharing">
+            <h2 class="seo-rail__title">SEO &amp; social</h2>
+            <div class="seo-practices" role="note">
+              <strong>Practice</strong>
+              <ul>
+                <li>One clear topic per post; use H2 for sections.</li>
+                <li>Slug: short, descriptive, lowercase with hyphens (auto until you edit it).</li>
+                <li>Tags: a few concrete topics — not keyword stuffing.</li>
+                <li>Excerpt: 1–2 sentences for listings; meta description ~150–160 chars for Google.</li>
+                <li>Share image: 1200×630 when possible; alt is generated for screen readers and social.</li>
+              </ul>
+            </div>
+            <label class="field">
+              <span>URL slug <span class="field-hint">(edit once to lock; AI won’t overwrite)</span></span>
+              <input type="text" id="f-slug" autocomplete="off" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span>Tags</span>
+              <input type="text" id="f-tags" placeholder="Water, ReH2O, Advocacy" />
+            </label>
+            <label class="field">
+              <span>Excerpt</span>
+              <textarea class="meta" id="f-excerpt" rows="3"></textarea>
+            </label>
+            <div class="field media-field">
+              <span class="field__label-row">Cover image <span class="field-hint">(hero + cards)</span></span>
+              <div class="media-field__row">
+                <input type="text" id="f-cover" placeholder="reh2o/delivery-1.jpg or cms-uploads/…" autocomplete="off" />
+                <button type="button" class="btn btn--ghost btn--sm" id="btn-cover-library" aria-label="Choose cover from library">Library</button>
+                <button type="button" class="btn btn--ghost btn--sm" id="btn-cover-upload" aria-label="Upload cover image">Upload</button>
+              </div>
+            </div>
+            <label class="field">
+              <span>Meta title <span class="field-hint">(optional SERP title)</span></span>
+              <input type="text" id="f-seo-title" maxlength="200" autocomplete="off" />
+              <span class="seo-meter" id="meter-seo-title"></span>
+            </label>
+            <label class="field">
+              <span>Meta description <span class="field-hint">(search snippet)</span></span>
+              <textarea class="meta" id="f-seo-desc" rows="4"></textarea>
+              <span class="seo-meter" id="meter-seo-desc"></span>
+            </label>
+            <div class="field media-field">
+              <span class="field__label-row">Social share image <span class="field-hint">(OG / X / LinkedIn)</span></span>
+              <div class="media-field__row">
+                <input type="text" id="f-seo-og" placeholder="URL or cms-uploads/…" autocomplete="off" />
+                <button type="button" class="btn btn--ghost btn--sm" id="btn-og-library" aria-label="Choose share image from library">Library</button>
+                <button type="button" class="btn btn--ghost btn--sm" id="btn-og-upload" aria-label="Upload share image">Upload</button>
+              </div>
+              <span class="seo-tip">If empty, the cover image is used. Alt text for this image is generated automatically (WCAG).</span>
+            </div>
+            <p class="seo-ai-alt">
+              <span class="seo-ai-alt__label">Share image alt (auto)</span>
+              <span id="seo-og-alt-readout" class="seo-ai-alt__val">—</span>
+            </p>
+            <div class="seo-toolbar">
+              <button type="button" class="btn btn--primary btn--sm" id="btn-ai-enrich">AI: summarize &amp; SEO</button>
+            </div>
+            <div class="seo-preview" id="og-preview-wrap" hidden>
+              <span class="seo-preview__label">Preview</span>
+              <img id="og-preview-img" alt="" class="seo-preview__img" width="1200" height="630" loading="lazy" decoding="async" />
+            </div>
+            <div class="seo-stats" id="seo-stats" aria-live="polite"></div>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <input type="file" id="media-file-input" class="visually-hidden" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" />
+
+    <div id="media-modal" class="media-modal" hidden role="dialog" aria-modal="true" aria-labelledby="media-modal-title">
+      <div class="media-modal__backdrop" id="media-modal-backdrop"></div>
+      <div class="media-modal__panel">
+        <header class="media-modal__head">
+          <h2 id="media-modal-title" class="media-modal__title">Media library</h2>
+          <button type="button" class="btn btn--ghost btn--sm" id="media-modal-close" aria-label="Close media library">Close</button>
+        </header>
+        <p class="media-modal__hint">Select an image or upload a new file (stored under <code>images/cms-uploads/</code>).</p>
+        <div class="media-modal__actions">
+          <button type="button" class="btn btn--primary btn--sm" id="media-modal-upload">Upload image</button>
+        </div>
+        <div id="media-grid" class="media-grid" role="list"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+    <script>
+      /** @type {import("@supabase/supabase-js").SupabaseClient | null} */
+      let sbClient = null;
+      const q = (sel) => document.querySelector(sel);
+      const toast = (msg, isError) => {
+        const el = q("#toast");
+        el.textContent = msg;
+        el.className = "toast is-visible" + (isError ? " is-error" : "");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => el.classList.remove("is-visible"), 4200);
+      };
+
+      async function authHeaders(opts = {}) {
+        const h = {};
+        if (sbClient) {
+          const { data } = await sbClient.auth.getSession();
+          const t = data.session?.access_token;
+          h.Authorization = `Bearer ${t || ""}`;
+        } else {
+          h.Authorization = "Bearer ";
+        }
+        const m = (opts.method || "GET").toUpperCase();
+        if (opts.body != null || ["POST", "PUT", "PATCH"].includes(m)) {
+          h["Content-Type"] = "application/json";
+        }
+        return h;
+      }
+
+      async function readApiError(res) {
+        const text = await res.text();
+        const t = String(text || "").trim();
+        if (/^<!DOCTYPE/i.test(t) || /^<html/i.test(t)) {
+          return `API unavailable (${res.status}). Open /admin/ on the deployed site or run the server that serves /api/* — not a static file preview.`;
+        }
+        try {
+          const j = JSON.parse(t);
+          let d = j.error ?? j.detail ?? t ?? res.statusText;
+          if (Array.isArray(d)) {
+            d = d
+              .map((x) => (typeof x === "object" && x.msg ? x.msg : String(x)))
+              .join("; ");
+          }
+          return typeof d === "string" ? d : JSON.stringify(d);
+        } catch {
+          return t.length > 400 ? t.slice(0, 400) + "…" : t || res.statusText;
+        }
+      }
+
+      async function api(path, opts = {}) {
+        let res;
+        try {
+          res = await fetch(path, { ...opts, headers: { ...(await authHeaders(opts)), ...opts.headers } });
+        } catch (e) {
+          toast(
+            "Could not reach the API. Use /admin on the same host as the server (deployed site or local http://127.0.0.1:8787/admin), not an opened file.",
+            true
+          );
+          throw e;
+        }
+        if (res.status === 503) {
+          const msg = await readApiError(res);
+          toast(msg, true);
+          const err = new Error(msg);
+          err.keepSession = true;
+          throw err;
+        }
+        if (res.status === 401 || res.status === 403) {
+          const msg = await readApiError(res);
+          if (sbClient) await sbClient.auth.signOut();
+          showLogin();
+          toast(msg, true);
+          throw new Error(msg);
+        }
+        return res;
+      }
+
+      function escAttr(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function toEmbedUrl(input) {
+        if (!input || !String(input).trim()) return null;
+        const s = String(input).trim();
+        if (/^https?:\/\//i.test(s) && (s.includes("/embed/") || s.includes("player.vimeo.com/video"))) return s;
+        try {
+          const u = new URL(s.startsWith("http") ? s : "https://" + s);
+          const host = u.hostname.replace(/^www\./, "");
+          if (host === "youtu.be") {
+            const id = u.pathname.replace(/^\//, "").split("/")[0];
+            if (id) return "https://www.youtube.com/embed/" + id;
+          }
+          if (host.endsWith("youtube.com")) {
+            const v = u.searchParams.get("v");
+            if (v) return "https://www.youtube.com/embed/" + v;
+            const m = u.pathname.match(/\/embed\/([^/?]+)/);
+            if (m) return "https://www.youtube.com/embed/" + m[1];
+            const shorts = u.pathname.match(/\/shorts\/([^/?]+)/);
+            if (shorts) return "https://www.youtube.com/embed/" + shorts[1];
+          }
+          if (host.endsWith("vimeo.com")) {
+            const m = u.pathname.match(/\/(?:video\/)?(\d+)/);
+            if (m) return "https://player.vimeo.com/video/" + m[1];
+          }
+        } catch (e) {
+          return null;
+        }
+        return null;
+      }
+
+      const BlockEmbed = Quill.import("blots/block/embed");
+
+      class VideoBlot extends BlockEmbed {
+        static create(value) {
+          const node = super.create();
+          node.setAttribute("src", value);
+          node.setAttribute("frameborder", "0");
+          node.setAttribute("allowfullscreen", true);
+          node.setAttribute("loading", "lazy");
+          node.classList.add("ql-video");
+          return node;
+        }
+        static value(node) {
+          return node.getAttribute("src");
+        }
+      }
+      VideoBlot.blotName = "video";
+      VideoBlot.tagName = "IFRAME";
+      Quill.register(VideoBlot, true);
+
+      class DividerBlot extends BlockEmbed {
+        static create() {
+          return super.create();
+        }
+        static value() {
+          return true;
+        }
+      }
+      DividerBlot.blotName = "divider";
+      DividerBlot.tagName = "div";
+      DividerBlot.className = "ql-divider";
+      Quill.register(DividerBlot);
+
+      const quill = new Quill("#editor", {
+        theme: "snow",
+        placeholder: "Write the story… Use H2 for sections. Add images with alt text; embed YouTube or Vimeo for video.",
+        modules: {
+          toolbar: {
+            container: [
+              [{ header: [2, 3, false] }],
+              ["bold", "italic", "underline", "strike"],
+              ["blockquote", "code-block"],
+              [{ list: "ordered" }, { list: "bullet" }],
+              ["link", "image", "video"],
+              ["clean"],
+            ],
+            handlers: {
+              image: function () {
+                openMediaModal("", true);
+              },
+              video: function () {
+                const raw = prompt("Paste a YouTube or Vimeo page URL");
+                const embed = toEmbedUrl(raw);
+                if (!embed) {
+                  if (raw && raw.trim()) toast("Could not parse that URL. Use a normal YouTube or Vimeo link.", true);
+                  return;
+                }
+                const range = this.quill.getSelection(true);
+                const idx = range ? range.index : this.quill.getLength();
+                this.quill.insertEmbed(idx, "video", embed, "user");
+              },
+            },
+          },
+        },
+      });
+
+      const toolbar = quill.getModule("toolbar");
+
+      (function attachDividerButton() {
+        const bar = toolbar.container;
+        const span = document.createElement("span");
+        span.className = "ql-formats";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ql-divider";
+        btn.setAttribute("aria-label", "Section divider");
+        btn.title = "Section divider";
+        btn.textContent = "—";
+        span.appendChild(btn);
+        bar.appendChild(span);
+        btn.addEventListener("click", () => {
+          const range = quill.getSelection(true);
+          const idx = range ? range.index : quill.getLength();
+          quill.insertEmbed(idx, "divider", true, "user");
+          quill.setSelection(idx + 1, 0);
+        });
+      })();
+
+      function meterMetaTitle(len) {
+        if (len === 0) return { cls: "is-empty", text: "Empty — search engines will use the page title." };
+        if (len >= 45 && len <= 62) return { cls: "is-good", text: len + " chars — good range for SERP titles." };
+        if (len < 45) return { cls: "is-warn", text: len + " chars — a bit short; consider ~50–60." };
+        return { cls: "is-warn", text: len + " chars — may truncate in results; shorten if possible." };
+      }
+
+      function meterMetaDesc(len) {
+        if (len === 0) return { cls: "is-empty", text: "Empty — snippet may be auto-generated from the body." };
+        if (len >= 140 && len <= 165) return { cls: "is-good", text: len + " chars — solid snippet length." };
+        if (len < 140) return { cls: "is-warn", text: len + " chars — consider ~150–160 for richer snippets." };
+        return { cls: "is-warn", text: len + " chars — may truncate; trim to ~160." };
+      }
+
+      function updateSeoMeters() {
+        const mt = q("#f-seo-title").value.length;
+        const md = q("#f-seo-desc").value.length;
+        const m1 = meterMetaTitle(mt);
+        const m2 = meterMetaDesc(md);
+        const el1 = q("#meter-seo-title");
+        const el2 = q("#meter-seo-desc");
+        el1.textContent = m1.text;
+        el1.className = "seo-meter " + m1.cls;
+        el2.textContent = m2.text;
+        el2.className = "seo-meter " + m2.cls;
+
+        const text = quill.getText().trim();
+        const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+        const mins = Math.max(1, Math.round(words / 220));
+        q("#seo-stats").textContent =
+          words + " words · ~" + mins + " min read (estimate). Use unique H2s, internal links where relevant, and alt text on images.";
+
+        const og = q("#f-seo-og").value.trim();
+        const wrap = q("#og-preview-wrap");
+        const img = q("#og-preview-img");
+        if (og && (/^https?:\/\//i.test(og) || og.includes("cms-uploads"))) {
+          img.src = /^https?:\/\//i.test(og) ? og : SITE_IMG + og.replace(/^\//, "");
+          img.alt = ogImageAltValue.trim() || "Social share preview";
+          wrap.hidden = false;
+        } else {
+          wrap.hidden = true;
+          img.removeAttribute("src");
+        }
+      }
+
+      ["#f-seo-title", "#f-seo-desc", "#f-seo-og"].forEach((sel) => {
+        q(sel).addEventListener("input", updateSeoMeters);
+      });
+      quill.on("text-change", updateSeoMeters);
+      updateSeoMeters();
+
+      const SITE_IMG = "https://www.goukraina.org/images/";
+      let slugManual = false;
+      let ogImageAltValue = "";
+      let mediaTargetField = "f-cover";
+      let mediaPickerForQuill = false;
+
+      function updateOgAltReadout() {
+        const el = q("#seo-og-alt-readout");
+        if (!el) return;
+        el.textContent = ogImageAltValue.trim() || "— (run AI or pick a share image)";
+      }
+
+      function setOgImageAlt(s) {
+        ogImageAltValue = String(s || "").trim();
+        updateOgAltReadout();
+        updateSeoMeters();
+      }
+
+      async function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => {
+            const s = String(r.result || "");
+            const i = s.indexOf(",");
+            resolve(i >= 0 ? s.slice(i + 1) : s);
+          };
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
+      }
+
+      async function apiUploadFile(file) {
+        const b64 = await fileToBase64(file);
+        const res = await api("/api/media", {
+          method: "POST",
+          body: JSON.stringify({ filename: file.name, content_base64: b64 }),
+        });
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(t || "Upload failed");
+        }
+        return res.json();
+      }
+
+      async function loadMediaList() {
+        const res = await api("/api/media");
+        if (!res.ok) throw new Error("Could not load media");
+        return res.json();
+      }
+
+      function renderMediaGrid(items) {
+        const grid = q("#media-grid");
+        grid.innerHTML = "";
+        if (!items || !items.length) {
+          grid.innerHTML = '<p class="media-grid__empty">No uploads yet. Use Upload image.</p>';
+          return;
+        }
+        items.forEach((it) => {
+          const url = it.url && it.url.startsWith("http") ? it.url : SITE_IMG.replace(/\/$/, "") + (it.url || "");
+          const path = it.path || "";
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "media-tile";
+          btn.setAttribute("role", "listitem");
+          btn.dataset.path = path;
+          const thumbAlt = "Thumbnail: " + (path.replace(/^.*\//, "") || "upload");
+          btn.innerHTML =
+            '<span class="media-tile__frame"><img src="' +
+            escAttr(url) +
+            '" alt="' +
+            escAttr(thumbAlt) +
+            '" loading="lazy" /></span><span class="media-tile__name">' +
+            escAttr(path.replace(/^.*\//, "")) +
+            "</span>";
+          btn.addEventListener("click", () => selectMedia(path, url));
+          grid.appendChild(btn);
+        });
+      }
+
+      async function openMediaModal(targetInputId, forQuill) {
+        mediaPickerForQuill = !!forQuill;
+        mediaTargetField = forQuill ? "" : (targetInputId || "f-cover");
+        q("#media-modal").hidden = false;
+        try {
+          const items = await loadMediaList();
+          renderMediaGrid(items);
+        } catch (e) {
+          toast(e.message || "Media list failed", true);
+          renderMediaGrid([]);
+        }
+      }
+
+      function closeMediaModal() {
+        q("#media-modal").hidden = true;
+        mediaPickerForQuill = false;
+      }
+
+      async function selectMedia(path, fullUrl) {
+        closeMediaModal();
+        if (mediaPickerForQuill) {
+          const hint = path || "";
+          let alt = "";
+          try {
+            const res = await api("/api/ai/alt-image", {
+              method: "POST",
+              body: JSON.stringify({
+                title: q("#f-title").value.trim(),
+                body_html: quill.root.innerHTML,
+                image_hint: hint,
+              }),
+            });
+            if (res.ok) {
+              const d = await res.json();
+              alt = d.og_image_alt || "";
+            }
+          } catch {
+            alt = "Photograph supporting the article";
+          }
+          const src = path ? SITE_IMG + path : fullUrl;
+          const range = quill.getSelection(true);
+          const idx = range ? range.index : quill.getLength();
+          const html = "<p><img src=\"" + escAttr(src) + '" alt="' + escAttr(alt || "Article image") + '" /></p>';
+          quill.clipboard.dangerouslyPasteHTML(idx, html);
+          return;
+        }
+        const inp = q("#" + mediaTargetField);
+        if (inp) {
+          inp.value = path || "";
+          inp.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        if (mediaTargetField === "f-seo-og") {
+          try {
+            const res = await api("/api/ai/alt-image", {
+              method: "POST",
+              body: JSON.stringify({
+                title: q("#f-title").value.trim(),
+                body_html: quill.root.innerHTML,
+                image_hint: path || inp.value,
+              }),
+            });
+            if (res.ok) {
+              const d = await res.json();
+              setOgImageAlt(d.og_image_alt || "");
+            }
+          } catch {
+            setOgImageAlt("Social sharing image for this article");
+          }
+        }
+      }
+
+      async function runAiEnrich() {
+        const title = q("#f-title").value.trim();
+        if (!title) return toast("Add a title first", true);
+        toast("Generating…", false);
+        try {
+          const res = await api("/api/ai/enrich", {
+            method: "POST",
+            body: JSON.stringify({
+              title,
+              body_html: quill.root.innerHTML,
+              excerpt: q("#f-excerpt").value.trim(),
+              slug: q("#f-slug").value.trim(),
+              slug_manual: slugManual,
+              tags: q("#f-tags")
+                .value.split(",")
+                .map((s) => s.trim())
+                .filter(Boolean),
+              share_image_hint: q("#f-seo-og").value.trim() || q("#f-cover").value.trim(),
+            }),
+          });
+          if (!res.ok) {
+            const err = await readApiError(res);
+            return toast(err, true);
+          }
+          const d = await res.json();
+          if (d.excerpt) q("#f-excerpt").value = d.excerpt;
+          if (d.meta_description) q("#f-seo-desc").value = d.meta_description;
+          if (d.meta_title) q("#f-seo-title").value = d.meta_title;
+          if (d.tags && d.tags.length) q("#f-tags").value = d.tags.join(", ");
+          if (d.og_image_alt) setOgImageAlt(d.og_image_alt);
+          if (!slugManual && d.suggested_slug) q("#f-slug").value = d.suggested_slug;
+          updateSeoMeters();
+          toast("AI suggestions applied");
+        } catch (e) {
+          toast(e.message || "AI failed", true);
+        }
+      }
+
+      let currentSlug = null;
+
+      function showLogin() {
+        q("#login-overlay").hidden = false;
+      }
+      function hideLogin() {
+        q("#login-overlay").hidden = true;
+      }
+
+      function slugReadonly(on) {
+        q("#f-slug").readOnly = !!on;
+      }
+
+      function fillForm(p, allowSlugEdit) {
+        currentSlug = p.slug;
+        slugManual = p.slug_manual === true;
+        q("#f-title").value = p.title || "";
+        q("#f-slug").value = p.slug || "";
+        q("#f-date").value = (p.date || "").slice(0, 10);
+        q("#f-status").value = p.status || "draft";
+        q("#f-tags").value = (p.tags || []).join(", ");
+        q("#f-cover").value = p.cover || "";
+        q("#f-excerpt").value = p.excerpt || "";
+        q("#f-seo-title").value = (p.seo && p.seo.meta_title) || "";
+        q("#f-seo-desc").value = (p.seo && p.seo.meta_description) || "";
+        q("#f-seo-og").value = (p.seo && p.seo.og_image) || "";
+        ogImageAltValue = (p.seo && p.seo.og_image_alt) || "";
+        updateOgAltReadout();
+        quill.root.innerHTML = p.body_html || "";
+        slugReadonly(!allowSlugEdit);
+        updateSeoMeters();
+      }
+
+      function collectPayload() {
+        const tags = q("#f-tags")
+          .value.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        return {
+          slug: q("#f-slug").value.trim(),
+          title: q("#f-title").value.trim(),
+          date: q("#f-date").value,
+          tags,
+          excerpt: q("#f-excerpt").value.trim(),
+          cover: q("#f-cover").value.trim(),
+          desc: q("#f-excerpt").value.trim() || q("#f-title").value.trim(),
+          body_html: quill.root.innerHTML,
+          status: q("#f-status").value,
+          slug_manual: slugManual,
+          seo: {
+            meta_title: q("#f-seo-title").value.trim(),
+            meta_description: q("#f-seo-desc").value.trim(),
+            og_image: q("#f-seo-og").value.trim(),
+            og_image_alt: ogImageAltValue,
+          },
+        };
+      }
+
+      function renderPostList(rows) {
+        const ul = q("#post-list");
+        ul.innerHTML = "";
+        rows.forEach((p) => {
+          const li = document.createElement("li");
+          const b = document.createElement("button");
+          b.type = "button";
+          b.dataset.slug = p.slug;
+          b.innerHTML = `<strong>${escapeHtml(p.title)}</strong><span class="post-list__meta">${escapeHtml(p.date)} · ${escapeHtml(p.status)}</span>`;
+          b.addEventListener("click", () => selectPost(p.slug, b));
+          li.appendChild(b);
+          ul.appendChild(li);
+        });
+      }
+
+      async function loadList() {
+        const res = await api("/api/posts");
+        if (!res.ok) {
+          const msg = await readApiError(res);
+          toast(msg, true);
+          const err = new Error(msg);
+          err.keepSession = true;
+          throw err;
+        }
+        const rows = await res.json();
+        renderPostList(rows);
+      }
+
+      function escapeHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      async function selectPost(slug, btnEl) {
+        const res = await api("/api/posts/" + encodeURIComponent(slug));
+        if (!res.ok) {
+          toast("Could not load post", true);
+          return;
+        }
+        const p = await res.json();
+        fillForm(p, false);
+        q("#post-list").querySelectorAll("button").forEach((b) => b.classList.remove("is-active"));
+        if (btnEl) btnEl.classList.add("is-active");
+      }
+
+      q("#sb-login-btn").addEventListener("click", async () => {
+        if (!sbClient) return toast("Supabase is not configured", true);
+        const email = q("#sb-email").value.trim().toLowerCase();
+        const password = q("#sb-password").value;
+        if (!email || !password) return toast("Enter email and password", true);
+        const { error } = await sbClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          const m = error.message || String(error);
+          if (/invalid login|invalid credentials/i.test(m)) {
+            return toast(
+              "Invalid email or password. Supabase stores email in lowercase — try again with lowercase. You can reset the password in Supabase → Authentication → Users.",
+              true
+            );
+          }
+          return toast(m, true);
+        }
+        try {
+          await loadList();
+          hideLogin();
+        } catch (e) {
+          showLogin();
+          if (!e.keepSession && sbClient) await sbClient.auth.signOut();
+        }
+      });
+
+      q("#btn-logout").addEventListener("click", async () => {
+        if (sbClient) await sbClient.auth.signOut();
+        showLogin();
+      });
+
+      q("#btn-save").addEventListener("click", async () => {
+        const payload = collectPayload();
+        if (!payload.slug || !payload.title) return toast("Slug and title are required", true);
+        const check = await api("/api/posts/" + encodeURIComponent(payload.slug));
+        const exists = check.ok;
+        const url = exists ? "/api/posts/" + encodeURIComponent(payload.slug) : "/api/posts";
+        const method = exists ? "PUT" : "POST";
+        const res = await api(url, { method, body: JSON.stringify(payload) });
+        if (!res.ok) {
+          const err = await res.text();
+          return toast(err || "Save failed", true);
+        }
+        toast("Saved");
+        currentSlug = payload.slug;
+        await loadList().catch(() => {});
+      });
+
+      q("#btn-new-draft").addEventListener("click", async () => {
+        const title = prompt("Draft title?", "Untitled field report");
+        if (!title) return;
+        const res = await api("/api/posts", { method: "POST", body: JSON.stringify({ title }) });
+        if (!res.ok) return toast("Could not create draft", true);
+        const p = await res.json();
+        fillForm(p, true);
+        currentSlug = p.slug;
+        toast("Draft created");
+        await loadList().catch(() => {});
+        const b = q('#post-list button[data-slug="' + p.slug + '"]');
+        if (b) b.classList.add("is-active");
+      });
+
+      q("#btn-rebuild").addEventListener("click", async () => {
+        const res = await api("/api/redeploy", { method: "POST" });
+        const data = await res.json();
+        if (data.ok) toast(data.message || (data.skipped ? "Deploy uses GitHub → Vercel by default." : "Redeploy triggered."));
+        else toast("Redeploy failed: " + (data.error || JSON.stringify(data)), true);
+      });
+
+      q("#f-slug").addEventListener("input", () => {
+        slugManual = true;
+      });
+
+      q("#btn-ai-enrich").addEventListener("click", () => runAiEnrich());
+
+      q("#btn-cover-library").addEventListener("click", () => openMediaModal("f-cover", false));
+      q("#btn-og-library").addEventListener("click", () => openMediaModal("f-seo-og", false));
+      function bindUploadBtn(btnSel, fieldId) {
+        q(btnSel).addEventListener("click", () => {
+          mediaTargetField = fieldId;
+          q("#media-file-input").click();
+        });
+      }
+      bindUploadBtn("#btn-cover-upload", "f-cover");
+      bindUploadBtn("#btn-og-upload", "f-seo-og");
+      q("#media-modal-upload").addEventListener("click", () => q("#media-file-input").click());
+
+      q("#media-file-input").addEventListener("change", async (ev) => {
+        const f = ev.target.files && ev.target.files[0];
+        ev.target.value = "";
+        if (!f) return;
+        try {
+          toast("Uploading…", false);
+          const out = await apiUploadFile(f);
+          const field = mediaTargetField || "f-cover";
+          const inp = q("#" + field);
+          if (inp) {
+            inp.value = out.path;
+            inp.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          if (field === "f-seo-og") {
+            const res = await api("/api/ai/alt-image", {
+              method: "POST",
+              body: JSON.stringify({
+                title: q("#f-title").value.trim(),
+                body_html: quill.root.innerHTML,
+                image_hint: out.path,
+              }),
+            });
+            if (res.ok) {
+              const d = await res.json();
+              setOgImageAlt(d.og_image_alt || "");
+            }
+          }
+          toast("Uploaded");
+          if (!q("#media-modal").hidden) {
+            const items = await loadMediaList();
+            renderMediaGrid(items);
+          }
+        } catch (e) {
+          toast(e.message || "Upload failed", true);
+        }
+      });
+
+      q("#media-modal-close").addEventListener("click", closeMediaModal);
+      q("#media-modal-backdrop").addEventListener("click", closeMediaModal);
+
+      async function boot() {
+        let cfg = { configured: false };
+        try {
+          const r = await fetch("/api/supabase-public-config");
+          if (r.ok) {
+            cfg = await r.json();
+          }
+        } catch {
+          /* network or CORS */
+        }
+        q("#login-supabase-panel").hidden = false;
+        const hint = q("#login-config-hint");
+        if (!cfg.configured || !cfg.url || !cfg.anonKey) {
+          sbClient = null;
+          hint.textContent =
+            "Supabase is not configured for this host. Set SUPABASE_URL and SUPABASE_ANON_KEY (see /api/supabase-public-config) and redeploy, or run the full stack locally.";
+          hint.hidden = false;
+          q("#sb-email").disabled = true;
+          q("#sb-password").disabled = true;
+          q("#sb-login-btn").disabled = true;
+          showLogin();
+          return;
+        }
+        hint.hidden = true;
+        q("#sb-email").disabled = false;
+        q("#sb-password").disabled = false;
+        q("#sb-login-btn").disabled = false;
+        const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+        sbClient = createClient(cfg.url, cfg.anonKey, {
+          auth: { persistSession: true, storage: window.sessionStorage },
+        });
+        const { data } = await sbClient.auth.getSession();
+        if (data.session) {
+          hideLogin();
+          loadList().catch(() => showLogin());
+          return;
+        }
+        showLogin();
+      }
+      boot();
+    </script>
+  </body>
+</html>

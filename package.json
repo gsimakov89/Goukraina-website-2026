@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "python3 build_site.py",
+    "vercel-build": "python3 build_site.py"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "jose": "^5.9.6"
+  }
+}
