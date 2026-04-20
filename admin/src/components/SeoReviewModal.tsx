@@ -36,7 +36,7 @@ const APPLYABLE = new Set([
 ]);
 
 export function SeoReviewModal({ open, data, onClose, onApply }: Props) {
-  const rows = data?.fields ?? [];
+  const rows = useMemo(() => data?.fields ?? [], [data?.fields]);
   const actionable = useMemo(
     () =>
       rows.filter((r) => {

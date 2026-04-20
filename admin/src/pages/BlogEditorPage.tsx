@@ -106,9 +106,7 @@ export function BlogEditorPage() {
   const [assistPrompt, setAssistPrompt] = useState("");
   const [mediaPicker, setMediaPicker] = useState<null | "cover" | "og" | "quill">(null);
   const quillRef = useRef<InstanceType<typeof ReactQuill> | null>(null);
-  const openQuillMediaRef = useRef<() => void>(() => {});
-
-  openQuillMediaRef.current = () => setMediaPicker("quill");
+  const openQuillMedia = useCallback(() => setMediaPicker("quill"), []);
 
   const quillModules = useMemo(
     () => ({
@@ -121,11 +119,11 @@ export function BlogEditorPage() {
           ["clean"],
         ],
         handlers: {
-          image: () => openQuillMediaRef.current(),
+          image: () => openQuillMedia(),
         },
       },
     }),
-    [],
+    [openQuillMedia],
   );
 
   const load = useCallback(async () => {
