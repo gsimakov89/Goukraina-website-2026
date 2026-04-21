@@ -1051,7 +1051,6 @@ def page_home() -> None:
   <main id="main" class="home-main">
     <section class="home-hero" aria-labelledby="hero-title">
       <div class="home-hero-bg" aria-hidden="true"></div>
-      <div class="home-hero-map" aria-hidden="true"></div>
       <span class="home-hero-dot home-hero-dot--1" aria-hidden="true"></span>
       <span class="home-hero-dot home-hero-dot--2" aria-hidden="true"></span>
       <span class="home-hero-dot home-hero-dot--3" aria-hidden="true"></span>
@@ -1068,35 +1067,15 @@ def page_home() -> None:
           <p class="home-hero-note"><strong>EIN 88-2011390</strong> · 100% of public gifts fund programs on the ground.</p>
         </div>
         <figure class="home-hero-media">
-          <svg class="home-hero-ua-svg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <clipPath id="ua-hero-clip-home" clipPathUnits="userSpaceOnUse">
-                <path d="{UKR_OUTLINE_PATH_D}"/>
-              </clipPath>
-              <linearGradient id="ua-hero-edge" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="oklch(88% 0.16 95)"/>
-                <stop offset="100%" stop-color="oklch(42% 0.14 255)"/>
-              </linearGradient>
-            </defs>
-            <image
-              class="home-hero-ua-photo"
-              href="{bi}/reh2o/station-interior.jpeg"
-              xlink:href="{bi}/reh2o/station-interior.jpeg"
-              x="-6" y="-6"
-              width="212" height="172"
-              preserveAspectRatio="xMidYMid slice"
-              clip-path="url(#ua-hero-clip-home)"
-            />
-            <path
-              class="home-hero-ua-edge"
-              fill="none"
-              stroke="url(#ua-hero-edge)"
-              stroke-width="1.1"
-              vector-effect="non-scaling-stroke"
-              d="{UKR_OUTLINE_PATH_D}"
-            />
-          </svg>
-          <figcaption class="visually-hidden">Field photo framed by the outline of Ukraine.</figcaption>
+          <img
+            class="home-hero-header-img"
+            src="images/hero/home-header.png"
+            alt="Go Ukraina emblem"
+            width="225"
+            height="225"
+            loading="eager"
+            decoding="async"
+          />
         </figure>
       </div>
     </section>

@@ -5467,6 +5467,15 @@ textarea:focus {
   margin: 0;
 }
 
+.home-hero-header-img {
+  width: 100%;
+  height: auto;
+  max-height: min(82vh, 42rem);
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 1.25rem 2.5rem oklch(18% 0.06 255 / 0.18));
+}
+
 .home-hero-ua-svg {
   width: 100%;
   height: auto;
@@ -5516,6 +5525,10 @@ textarea:focus {
     justify-self: center;
     width: min(100%, 28rem);
     order: -1;
+  }
+
+  .home-hero-header-img {
+    max-height: min(56vh, 28rem);
   }
 
   .home-hero-ua-svg {
