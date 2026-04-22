@@ -25,6 +25,7 @@ create index if not exists blog_posts_status_idx on public.blog_posts (status);
 alter table public.blog_posts enable row level security;
 
 -- Anyone can read published posts (anon + authenticated) — used if clients hit PostgREST directly.
+drop policy if exists "blog_posts_select_published" on public.blog_posts;
 create policy "blog_posts_select_published"
   on public.blog_posts
   for select
@@ -38,12 +39,14 @@ create table if not exists public.admin_users (
 
 alter table public.admin_users enable row level security;
 
+drop policy if exists "admin_users_no_direct_select" on public.admin_users;
 create policy "admin_users_no_direct_select"
   on public.admin_users
   for select
   to authenticated
   using (auth.uid() = user_id);
 
+drop policy if exists "blog_posts_admin_all" on public.blog_posts;
 create policy "blog_posts_admin_all"
   on public.blog_posts
   for all
