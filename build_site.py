@@ -246,8 +246,8 @@ def html_blog_author_block() -> str:
 with open(ROOT / "goukraina-scrape.json", encoding="utf-8") as f:
     SCRAPE: dict = json.load(f)
 
-# ReH2O initiative: field + 3D overview videos (same assets as goukraina.org production SPA).
-REH2O_VIDEOS_BASE = "https://www.goukraina.org/videos"
+# ReH2O initiative: MP4s live under public/images/videos/ (root-relative on deploy).
+REH2O_VIDEOS_BASE = "/images/videos"
 
 # Power generators initiative — branded placeholder until field photography is supplied (swap URL in one place).
 POWER_INIT_PLACEHOLDER = (
@@ -262,7 +262,7 @@ def ai_prompt_image(prompt: str, width: int = 800, height: int = 500) -> str:
 
 
 def blog_cover_url(entry: dict[str, object]) -> str:
-    """Hero/cover: full URL (e.g. Supabase Storage), site path (/…), or filename under goukraina.org/images/."""
+    """Hero/cover: full URL (e.g. Supabase Storage), site path (/…), or filename under /images/."""
     rel = entry.get("cover")
     if isinstance(rel, str) and rel.strip():
         s = rel.strip()
@@ -271,7 +271,7 @@ def blog_cover_url(entry: dict[str, object]) -> str:
         if s.startswith("/"):
             return SITE_ORIGIN + s
         return f"{IMG}/images/{s}"
-    return f"{IMG}/opengraph.jpg"
+    return f"{IMG}/images/opengraph.jpg"
 
 
 def blog_share_image_url(entry: dict[str, object]) -> str:
@@ -489,7 +489,7 @@ def head_common(
     p = prefix(depth)
     te = html_lib.escape(title)
     de = html_lib.escape(description, quote=True)
-    og_img = og_image if og_image else f"{base}/opengraph.jpg"
+    og_img = og_image if og_image else f"{base}/images/opengraph.jpg"
     og_img_esc = html_lib.escape(og_img, quote=True)
     og_alt_block = ""
     if og_image_alt:
@@ -552,7 +552,7 @@ def head_common(
   <meta name="twitter:title" content="{te}" />
   <meta name="twitter:description" content="{de}" />
   <meta name="twitter:image" content="{og_img_esc}" />
-  <link rel="icon" type="image/svg+xml" href="{base}/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="{base}/images/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
