@@ -34,7 +34,8 @@ for (const cmd of candidates) {
   });
   if (result.error?.code === "ENOENT") continue;
   if (result.status === 0) {
-    const logo = path.join(root, "public", "assets", "img", "logo.png");
+    const imgDir = path.join(root, "public", "assets", "img");
+    const logo = path.join(imgDir, "logo.png");
     if (!fs.existsSync(logo)) {
       console.error(
         "run_build_site: missing",
@@ -43,6 +44,17 @@ for (const cmd of candidates) {
       );
       process.exit(1);
     }
+    let n = 0;
+    function walk(d) {
+      if (!fs.existsSync(d)) return;
+      for (const name of fs.readdirSync(d, { withFileTypes: true })) {
+        const p = path.join(d, name.name);
+        if (name.isDirectory()) walk(p);
+        else n++;
+      }
+    }
+    walk(imgDir);
+    console.log(`run_build_site: public/assets/img has ${n} file(s) (Vercel should deploy these with outputDirectory public).`);
   }
   process.exit(result.status === null ? 1 : result.status);
 }
