@@ -127,6 +127,7 @@ def nav_items_get_all() -> list[dict[str, Any]]:
                 "parent_id": row.get("parent_id"),
                 "is_active": bool(row.get("is_active", True)),
                 "nav_group": row.get("nav_group") or "desktop",
+                "icon_key": row.get("icon_key") or "",
             }
         )
     return out
@@ -160,6 +161,7 @@ def nav_items_replace_all(items: list[dict[str, Any]]) -> None:
                 "parent_id": item.get("parent_id"),
                 "is_active": item.get("is_active") is not False,
                 "nav_group": str(item.get("nav_group") or "desktop").strip(),
+                "icon_key": str(item.get("icon_key") or "").strip()[:64],
             }
         )
     if not rows:
@@ -182,6 +184,7 @@ def nav_items_insert_one(body: dict[str, Any]) -> dict[str, Any]:
         "parent_id": body.get("parent_id"),
         "is_active": body.get("is_active") is not False,
         "nav_group": str(body.get("nav_group") or "desktop").strip(),
+        "icon_key": str(body.get("icon_key") or "").strip()[:64],
     }
     r = httpx.post(
         f"{_base()}/nav_items",
@@ -205,4 +208,5 @@ def nav_items_insert_one(body: dict[str, Any]) -> dict[str, Any]:
         "parent_id": data.get("parent_id"),
         "is_active": bool(data.get("is_active", True)),
         "nav_group": data.get("nav_group") or "desktop",
+        "icon_key": data.get("icon_key") or "",
     }

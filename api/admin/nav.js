@@ -29,6 +29,7 @@ function mapItem(row) {
     parent_id: row.parent_id || null,
     is_active: !!row.is_active,
     nav_group: row.nav_group || "desktop",
+    icon_key: row.icon_key || "",
   };
 }
 
@@ -72,6 +73,7 @@ export default async function handler(req, res) {
           parent_id: item.parent_id || null,
           is_active: item.is_active !== false,
           nav_group: String(item.nav_group || "desktop").trim(),
+          icon_key: String(item.icon_key || "").trim().slice(0, 64),
         })).filter((r) => r.label && r.href);
 
         const { error } = await sb.from(TABLE).insert(rows);
@@ -100,6 +102,7 @@ export default async function handler(req, res) {
         parent_id: body.parent_id || null,
         is_active: body.is_active !== false,
         nav_group: String(body.nav_group || "desktop").trim(),
+        icon_key: String(body.icon_key || "").trim().slice(0, 64),
       };
       const { data, error } = await sb.from(TABLE).insert(row).select("*").single();
       if (error) throw error;

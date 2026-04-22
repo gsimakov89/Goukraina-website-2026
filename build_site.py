@@ -75,7 +75,7 @@ def _fetch_nav_items() -> list[dict]:
         if not url or not key:
             return []
         r = httpx.get(
-            f"{url}/rest/v1/nav_items?select=label,href,target,sort_order,nav_group,is_active"
+            f"{url}/rest/v1/nav_items?select=label,href,target,sort_order,nav_group,is_active,icon_key"
             "&is_active=eq.true&order=sort_order.asc",
             headers={"apikey": key, "Authorization": f"Bearer {key}"},
             timeout=8,
@@ -711,6 +711,83 @@ def mobile_tab_for(current: str) -> str:
     return "more"
 
 
+# Inner SVG paths for mobile "More" toolbar (nav_group=mobile). Keys match admin icon picker.
+MOBILE_NAV_ICONS: dict[str, str] = {
+    "link": (
+        '<path d="M10 13a5 5 0 007.54.54l1.47 1.47a5 5 0 10-7.07-7.07l-.53.53"/>'
+        '<path d="M14 11a5 5 0 00-7.54-.54l-1.47-1.47a5 5 0 107.07 7.07l.53-.53"/>'
+    ),
+    "reh2o": '<path d="M12 2C9 9 5 13 5 18a7 7 0 1014 0c0-5-4-9-7-16z"/>',
+    "power": '<path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>',
+    "advocacy": '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    "dream": '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>',
+    "summit": '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    "blog": (
+        '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>'
+        '<path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>'
+    ),
+    "contact": (
+        '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>'
+        '<path d="M22 6l-10 7L2 6"/>'
+    ),
+    "heart": (
+        '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>'
+    ),
+    "home": (
+        '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>'
+        '<path d="M9 22V12h6v10"/>'
+    ),
+    "about": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+    "impact": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    "donate": (
+        '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>'
+    ),
+    "globe": '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>',
+    "users": '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
+    "star": '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+    "gift": '<path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>',
+}
+
+
+def _mobile_more_tiles_from_db(depth: int, current: str) -> str | None:
+    """Build mobile More-toolbar tiles from nav_items where nav_group=mobile."""
+    items = [
+        r
+        for r in _NAV_ITEMS
+        if r.get("is_active", True) and str(r.get("nav_group") or "desktop") == "mobile"
+    ]
+    if len(items) < 1:
+        return None
+    p = prefix(depth)
+    parts: list[str] = []
+    for row in sorted(items, key=lambda x: int(x.get("sort_order") or 0)):
+        href = str(row.get("href") or "").strip()
+        label = str(row.get("label") or "").strip()
+        if not href or not label:
+            continue
+        icon_name = str(row.get("icon_key") or "").strip().lower()
+        svg_inner = MOBILE_NAV_ICONS.get(icon_name) or MOBILE_NAV_ICONS["link"]
+        ext = href.startswith(("http://", "https://"))
+        resolved = href if ext else f"{p}{href.lstrip('/')}"
+        tg = str(row.get("target") or "").strip()
+        if ext:
+            tgt = tg or "_blank"
+            ext_attrs = f' target="{html_lib.escape(tgt)}" rel="noopener noreferrer"'
+        elif tg:
+            ext_attrs = f' target="{html_lib.escape(tg)}"'
+        else:
+            ext_attrs = ""
+        esc_h = html_lib.escape(resolved, quote=True)
+        esc_l = html_lib.escape(label)
+        parts.append(
+            f'<a class="nav-tile" href="{esc_h}"{ext_attrs}>'
+            f'<span class="nav-tile__ico" aria-hidden="true"><svg class="nav-tile__svg" viewBox="0 0 24 24" fill="none" '
+            f'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">{svg_inner}</svg></span>'
+            f'<span class="nav-tile__txt">{esc_l}</span></a>'
+        )
+    return ("      " + "\n      ".join(parts)) if parts else None
+
+
 def _desktop_nav_links_html(depth: int, current: str) -> str | None:
     """If Supabase has enough active nav_items, return desktop <a> links; else None (use hardcoded nav)."""
     items = [
@@ -788,6 +865,7 @@ def header_nav(depth: int, current: str) -> str:
     ico_contact = '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/>'
 
     db_nav = _desktop_nav_links_html(depth, current)
+    db_mobile_tiles = _mobile_more_tiles_from_db(depth, current)
     if db_nav:
         primary_nav_inner = db_nav
     else:
@@ -808,6 +886,17 @@ def header_nav(depth: int, current: str) -> str:
         {nav_link("contact/index.html", "Contact", "contact")}"""
 
     mt = mobile_tab_for(current)
+    if db_mobile_tiles:
+        more_track_inner = db_mobile_tiles
+    else:
+        more_track_inner = f"""      {nav_tile("initiatives/reh2o/index.html", "ReH2O", "init-reh2o", ico_reh2o)}
+      {nav_tile("initiatives/power-generators/index.html", "Power", "init-power", ico_power)}
+      {nav_tile("initiatives/advocacy/index.html", "Advocacy", "init-advocacy", ico_advocacy)}
+      {nav_tile("initiatives/ukraine-dreamzzz/index.html", "Dreamzzz", "init-dream", ico_dream)}
+      {nav_tile(URS_SUMMIT_URL, "Summit", "summit", ico_summit)}
+      {nav_tile("blog/index.html", "Blog", "blog", ico_blog)}
+      {nav_tile("contact/index.html", "Contact", "contact", ico_contact)}"""
+
     return f"""
 <body data-mobile-tab="{mt}">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -825,13 +914,7 @@ def header_nav(depth: int, current: str) -> str:
   <div class="mobile-more-panel" id="more-toolbar" role="navigation" aria-label="More navigation" aria-hidden="true">
     <p class="nav-panel-label nav-panel-label--toolbar" id="more-toolbar-label">Quick links</p>
     <div class="mobile-more-panel__track" aria-labelledby="more-toolbar-label">
-      {nav_tile("initiatives/reh2o/index.html", "ReH2O", "init-reh2o", ico_reh2o)}
-      {nav_tile("initiatives/power-generators/index.html", "Power", "init-power", ico_power)}
-      {nav_tile("initiatives/advocacy/index.html", "Advocacy", "init-advocacy", ico_advocacy)}
-      {nav_tile("initiatives/ukraine-dreamzzz/index.html", "Dreamzzz", "init-dream", ico_dream)}
-      {nav_tile(URS_SUMMIT_URL, "Summit", "summit", ico_summit)}
-      {nav_tile("blog/index.html", "Blog", "blog", ico_blog)}
-      {nav_tile("contact/index.html", "Contact", "contact", ico_contact)}
+{more_track_inner}
     </div>
   </div>
 """

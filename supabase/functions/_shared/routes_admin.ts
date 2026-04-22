@@ -104,6 +104,7 @@ function mapNavItem(row: Record<string, unknown>) {
     parent_id: row.parent_id || null,
     is_active: !!row.is_active,
     nav_group: row.nav_group || "desktop",
+    icon_key: row.icon_key || "",
   };
 }
 
@@ -151,6 +152,7 @@ export async function handleAdminNav(req: Request): Promise<Response> {
             parent_id: item.parent_id || null,
             is_active: item.is_active !== false,
             nav_group: String(item.nav_group || "desktop").trim(),
+            icon_key: String(item.icon_key || "").trim().slice(0, 64),
           }))
           .filter((r) => r.label && r.href);
 
@@ -183,6 +185,7 @@ export async function handleAdminNav(req: Request): Promise<Response> {
         parent_id: body.parent_id || null,
         is_active: body.is_active !== false,
         nav_group: String(body.nav_group || "desktop").trim(),
+        icon_key: String(body.icon_key || "").trim().slice(0, 64),
       };
       const { data, error } = await sb.from(TABLE_NAV).insert(row).select("*").single();
       if (error) throw error;

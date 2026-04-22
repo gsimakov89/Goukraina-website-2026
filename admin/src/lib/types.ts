@@ -26,6 +26,8 @@ export type NavItem = {
   parent_id?: string | null;
   is_active: boolean;
   nav_group: string;
+  /** Preset id for mobile toolbar icon (nav_group === "mobile"). */
+  icon_key?: string;
 };
 
 export type MediaLibraryItem = {
