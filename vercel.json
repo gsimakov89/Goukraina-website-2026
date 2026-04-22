@@ -9,6 +9,13 @@
       "maxDuration": 10
     }
   },
+  "redirects": [
+    {
+      "source": "/images/:path*",
+      "destination": "/assets/img/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/admin/:path*", "destination": "/admin/index.html" }
   ]

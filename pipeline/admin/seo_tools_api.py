@@ -151,7 +151,7 @@ def generate_rss(posts: list[dict[str, Any]]) -> str:
         cover = p.get("cover")
         cover_line = ""
         if cover:
-            cover_line = f'\n    <enclosure url="{SITE_ORIGIN}/images/{cover}" type="image/jpeg" length="0" />'
+            cover_line = f'\n    <enclosure url="{SITE_ORIGIN}/assets/img/{cover}" type="image/jpeg" length="0" />'
         tags = p.get("tags")
         tag_xml = ""
         if isinstance(tags, list):
@@ -176,7 +176,7 @@ def generate_rss(posts: list[dict[str, Any]]) -> str:
     <language>en-us</language>
     <atom:link href="{SITE_ORIGIN}/blog/rss.xml" rel="self" type="application/rss+xml" />
     <image>
-      <url>{SITE_ORIGIN}/images/logo.png</url>
+      <url>{SITE_ORIGIN}/assets/img/logo.png</url>
       <title>Go Ukraina</title>
       <link>{SITE_ORIGIN}</link>
     </image>

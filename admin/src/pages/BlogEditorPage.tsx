@@ -8,7 +8,7 @@ import { api, readError } from "@/lib/api";
 import type { MediaLibraryItem, PostRow } from "@/lib/types";
 
 /** Hero / OG preview when stored as filename or path (matches build_site blog URLs). */
-const SITE_IMG_BASE = "https://www.goukraina.org/images";
+const SITE_IMG_BASE = "https://www.goukraina.org/assets/img";
 
 function imageUrlForPreview(raw: string): string {
   const s = raw.trim();
@@ -484,7 +484,7 @@ export function BlogEditorPage() {
             <span className="text-[oklch(40%_0.03_260)]">Cover image</span>
             <p className="mt-0.5 text-xs text-[oklch(45%_0.03_260)]">
               Main image at the top of the post. Stored as a filename under{" "}
-              <code className="rounded bg-[oklch(96%_0.02_250)] px-1">/images/</code> on the live site.
+              <code className="rounded bg-[oklch(96%_0.02_250)] px-1">/assets/img/</code> on the live site.
             </p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
               <input

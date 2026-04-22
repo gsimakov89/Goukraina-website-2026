@@ -33,6 +33,17 @@ for (const cmd of candidates) {
     shell: false,
   });
   if (result.error?.code === "ENOENT") continue;
+  if (result.status === 0) {
+    const logo = path.join(root, "public", "assets", "img", "logo.png");
+    if (!fs.existsSync(logo)) {
+      console.error(
+        "run_build_site: missing",
+        logo,
+        "— add site photos under public/assets/img/ (see build_site.py SITE_MEDIA)."
+      );
+      process.exit(1);
+    }
+  }
   process.exit(result.status === null ? 1 : result.status);
 }
 

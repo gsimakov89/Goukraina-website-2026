@@ -126,6 +126,8 @@ def _newsletter_popup_script(base_prefix: str) -> str:
     return f'  <script src="{base_prefix}assets/js/newsletter-popup.js" defer></script>'
 SITE_ORIGIN = "https://www.goukraina.org"
 IMG = SITE_ORIGIN
+# Static photos/video posters live next to CSS/JS so Vercel serves them reliably (see public/assets/img/).
+SITE_MEDIA = "/assets/img"
 # Official Ukraine Reconstruction Summit (URS) — primary destination for “Summit” nav.
 URS_SUMMIT_URL = "https://www.ursummit.com/"
 
@@ -246,8 +248,8 @@ def html_blog_author_block() -> str:
 with open(ROOT / "goukraina-scrape.json", encoding="utf-8") as f:
     SCRAPE: dict = json.load(f)
 
-# ReH2O initiative: MP4s live under public/images/videos/ (root-relative on deploy).
-REH2O_VIDEOS_BASE = "/images/videos"
+# ReH2O initiative: MP4s under public/assets/img/videos/.
+REH2O_VIDEOS_BASE = f"{SITE_MEDIA}/videos"
 
 # Power generators initiative — branded placeholder until field photography is supplied (swap URL in one place).
 POWER_INIT_PLACEHOLDER = (
@@ -262,7 +264,7 @@ def ai_prompt_image(prompt: str, width: int = 800, height: int = 500) -> str:
 
 
 def blog_cover_url(entry: dict[str, object]) -> str:
-    """Hero/cover: full URL (e.g. Supabase Storage), site path (/…), or filename under /images/."""
+    """Hero/cover: full URL (e.g. Supabase Storage), site path (/…), or filename under /assets/img/."""
     rel = entry.get("cover")
     if isinstance(rel, str) and rel.strip():
         s = rel.strip()
@@ -270,8 +272,8 @@ def blog_cover_url(entry: dict[str, object]) -> str:
             return s
         if s.startswith("/"):
             return SITE_ORIGIN + s
-        return f"{IMG}/images/{s}"
-    return f"{IMG}/images/opengraph.jpg"
+        return f"{SITE_ORIGIN}{SITE_MEDIA}/{s}"
+    return f"{SITE_ORIGIN}{SITE_MEDIA}/opengraph.jpg"
 
 
 def blog_share_image_url(entry: dict[str, object]) -> str:
@@ -282,7 +284,7 @@ def blog_share_image_url(entry: dict[str, object]) -> str:
             return raw
         if raw.startswith("/"):
             return SITE_ORIGIN + raw
-        return f"{IMG}/images/{raw.lstrip('/')}"
+        return f"{SITE_ORIGIN}{SITE_MEDIA}/{raw.lstrip('/')}"
     return blog_cover_url(entry)
 
 
@@ -489,7 +491,7 @@ def head_common(
     p = prefix(depth)
     te = html_lib.escape(title)
     de = html_lib.escape(description, quote=True)
-    og_img = og_image if og_image else f"{base}/images/opengraph.jpg"
+    og_img = og_image if og_image else f"{base}{SITE_MEDIA}/opengraph.jpg"
     og_img_esc = html_lib.escape(og_img, quote=True)
     og_alt_block = ""
     if og_image_alt:
@@ -552,7 +554,7 @@ def head_common(
   <meta name="twitter:title" content="{te}" />
   <meta name="twitter:description" content="{de}" />
   <meta name="twitter:image" content="{og_img_esc}" />
-  <link rel="icon" type="image/svg+xml" href="{base}/images/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="{base}{SITE_MEDIA}/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -600,7 +602,7 @@ def json_ld_org_webpage(
                 "url": SITE_ORIGIN,
                 "logo": {
                     "@type": "ImageObject",
-                    "url": f"{SITE_ORIGIN}/images/logo.png",
+                    "url": f"{SITE_ORIGIN}{SITE_MEDIA}/logo.png",
                 },
                 "description": "Go Ukraina is a Los Angeles-based 501(c)(3) humanitarian nonprofit delivering essential aid, clean water solutions, and infrastructure rebuilding in war-affected Ukraine.",
                 "foundingDate": "2022",
@@ -813,7 +815,7 @@ def header_nav(depth: int, current: str) -> str:
   <header class="site-header" role="banner">
     <div class="header-inner">
       <a class="logo-link" href="{p}index.html">
-        <img src="{IMG}/images/logo.png" width="200" height="60" alt="Go Ukraina" />
+        <img src="{SITE_MEDIA}/logo.png" width="200" height="60" alt="Go Ukraina" />
       </a>
       <nav class="nav-main nav-main--desktop" id="primary-nav" aria-label="Primary navigation">
 {primary_nav_inner}
@@ -1039,7 +1041,7 @@ def page_home() -> None:
     desc = (
         "Go Ukraina is a Los Angeles-based 501(c)(3) nonprofit delivering clean water, emergency power, and advocacy for war-affected Ukraine. Donate to make an impact."
     )
-    bi = f"{IMG}/images"
+    bi = SITE_MEDIA
     cover_wash = blog_cover_url(blog_entry("ukraine-water-crisis-wash-cluster"))
     cover_reh2o_home = f"{bi}/reh2o/crane-station.jpg"
     cover_advocacy = blog_cover_url(blog_entry("ukrainian-pows-humanitarian-crisis"))
@@ -1069,7 +1071,7 @@ def page_home() -> None:
         <figure class="home-hero-media">
           <img
             class="home-hero-header-img"
-            src="images/hero/home-header.png"
+            src="{SITE_MEDIA}/logo.png"
             alt="Go Ukraina emblem"
             width="225"
             height="225"
@@ -1619,7 +1621,7 @@ def page_about() -> None:
       <div class="about-team-grid">
         <article class="about-team-card">
           <div class="about-team-card__media about-team-card__media--german">
-            <img src="{IMG}/images/german-simakovski.png" alt="Portrait of German Simakovski" width="400" height="400" loading="lazy" decoding="async" />
+            <img src="{SITE_MEDIA}/german-simakovski.png" alt="Portrait of German Simakovski" width="400" height="400" loading="lazy" decoding="async" />
           </div>
           <div class="about-team-card__body">
             <h3 class="about-team-card__name">German Simakovski</h3>
@@ -1629,7 +1631,7 @@ def page_about() -> None:
         </article>
         <article class="about-team-card">
           <div class="about-team-card__media about-team-card__media--olena">
-            <img src="{IMG}/images/olena-simakovski.png" alt="Portrait of Olena Simakovski" width="400" height="400" loading="lazy" decoding="async" />
+            <img src="{SITE_MEDIA}/olena-simakovski.png" alt="Portrait of Olena Simakovski" width="400" height="400" loading="lazy" decoding="async" />
           </div>
           <div class="about-team-card__body">
             <h3 class="about-team-card__name">Olena Simakovski</h3>
@@ -1639,7 +1641,7 @@ def page_about() -> None:
         </article>
         <article class="about-team-card">
           <div class="about-team-card__media">
-            <img src="{IMG}/images/adrien-tompert.jpg" alt="Portrait of Adrien Tompert" width="400" height="400" loading="lazy" decoding="async" />
+            <img src="{SITE_MEDIA}/adrien-tompert.jpg" alt="Portrait of Adrien Tompert" width="400" height="400" loading="lazy" decoding="async" />
           </div>
           <div class="about-team-card__body">
             <h3 class="about-team-card__name">Adrien Tompert</h3>
@@ -1649,7 +1651,7 @@ def page_about() -> None:
         </article>
         <article class="about-team-card">
           <div class="about-team-card__media">
-            <img src="{IMG}/images/nikol-bohach.png" alt="Portrait of Nikol Bohach" width="400" height="400" loading="lazy" decoding="async" />
+            <img src="{SITE_MEDIA}/nikol-bohach.png" alt="Portrait of Nikol Bohach" width="400" height="400" loading="lazy" decoding="async" />
           </div>
           <div class="about-team-card__body">
             <h3 class="about-team-card__name">Nikol Bohach</h3>
@@ -1706,7 +1708,7 @@ def page_reh2o() -> None:
         "Stakeholders discussing program outcomes and next deployments",
     ]
     gal = "".join(
-        f'<figure><img src="{IMG}/images/{p}" alt="{html_lib.escape(img_alts[i])}" loading="lazy" width="600" height="450" /></figure>'
+        f'<figure><img src="{SITE_MEDIA}/{p}" alt="{html_lib.escape(img_alts[i])}" loading="lazy" width="600" height="450" /></figure>'
         for i, p in enumerate(imgs)
     )
     sol_solar = ai_prompt_image(
@@ -1725,7 +1727,7 @@ def page_reh2o() -> None:
 {head_common(d, title, desc, "/initiatives/reh2o")}
 {header_nav(d, "init-reh2o")}
   <main id="main" class="site-inner reh2o-page">
-    <header class="power-hero reveal" style="--power-hero-bg: url('{IMG}/images/reh2o/crane-station.jpg')">
+    <header class="power-hero reveal" style="--power-hero-bg: url('{SITE_MEDIA}/reh2o/crane-station.jpg')">
       <div class="power-hero__noise" aria-hidden="true"></div>
       <div class="power-hero__accent" aria-hidden="true"></div>
       <div class="power-hero__inner">
@@ -1779,7 +1781,7 @@ def page_reh2o() -> None:
       <div class="reh2o-video-grid">
         <figure class="reh2o-video">
           <div class="reh2o-video__frame">
-            <video controls playsinline preload="metadata" poster="{IMG}/images/reh2o/delivery-1.jpg" aria-label="ReH2O field deployment video">
+            <video controls playsinline preload="metadata" poster="{SITE_MEDIA}/reh2o/delivery-1.jpg" aria-label="ReH2O field deployment video">
               <source src="{REH2O_VIDEOS_BASE}/reh2o-project.mp4" type="video/mp4" />
             </video>
           </div>
@@ -1790,7 +1792,7 @@ def page_reh2o() -> None:
         </figure>
         <figure class="reh2o-video">
           <div class="reh2o-video__frame">
-            <video controls playsinline preload="metadata" poster="{IMG}/images/reh2o/station-interior.jpeg" aria-label="ReH2O station 3D overview video">
+            <video controls playsinline preload="metadata" poster="{SITE_MEDIA}/reh2o/station-interior.jpeg" aria-label="ReH2O station 3D overview video">
               <source src="{REH2O_VIDEOS_BASE}/reh2o-3d.mp4" type="video/mp4" />
             </video>
           </div>
@@ -1939,7 +1941,7 @@ def page_advocacy() -> None:
 {head_common(d, title, desc, "/initiatives/advocacy")}
 {header_nav(d, "init-advocacy")}
   <main id="main" class="site-inner">
-    <header class="power-hero reveal" style="--power-hero-bg: url('{IMG}/images/ombudsman-meeting.jpg')">
+    <header class="power-hero reveal" style="--power-hero-bg: url('{SITE_MEDIA}/ombudsman-meeting.jpg')">
       <div class="power-hero__noise" aria-hidden="true"></div>
       <div class="power-hero__accent" aria-hidden="true"></div>
       <div class="power-hero__inner">
@@ -1956,7 +1958,7 @@ def page_advocacy() -> None:
         <p>Together, we coordinate outreach, policy briefings, and diplomatic engagement focused on two of the most urgent humanitarian crises of the war: the release of Ukrainian prisoners of war and the return of children unlawfully deported or forcibly transferred from Ukraine to Russia.</p>
       </div>
       <div class="partner-strip reveal">
-        <img src="{IMG}/images/ombudsman-logo.png" alt="Office of the Ombudsman of Ukraine logo" loading="lazy" width="200" height="120" />
+        <img src="{SITE_MEDIA}/ombudsman-logo.png" alt="Office of the Ombudsman of Ukraine logo" loading="lazy" width="200" height="120" />
       </div>
     </section>
     <section class="section section-alt reveal">
@@ -1984,8 +1986,8 @@ def page_advocacy() -> None:
         <p><strong>Request to Participate</strong></p>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--space-md);margin-top:var(--space-md)">
-        <img src="{IMG}/images/ombudsman-meeting.jpg" alt="Go Ukraina delegation meeting with Ombudsman Dmytro Lubinets in Kyiv" loading="lazy" width="600" height="400" />
-        <img src="{IMG}/images/ombudsman-kyiv.jpg" alt="Human Rights Topics in Ukraine: Ombudsman's office team at high-level briefing in Kyiv" loading="lazy" width="600" height="400" />
+        <img src="{SITE_MEDIA}/ombudsman-meeting.jpg" alt="Go Ukraina delegation meeting with Ombudsman Dmytro Lubinets in Kyiv" loading="lazy" width="600" height="400" />
+        <img src="{SITE_MEDIA}/ombudsman-kyiv.jpg" alt="Human Rights Topics in Ukraine: Ombudsman's office team at high-level briefing in Kyiv" loading="lazy" width="600" height="400" />
       </div>
     </section>
     <section class="section section-alt reveal">
@@ -2033,7 +2035,7 @@ def page_dream() -> None:
     desc = (
         "Train in Miami with elite coaches. Ukraine Dreamzzz backs young Ukrainian athletes in boxing, MMA & kickboxing—housing, competitions, and leadership through Go Ukraina, a Los Angeles 501(c)(3)."
     )
-    og_img = f"{IMG}/images/ukraine-dreamzzz.jpeg"
+    og_img = f"{SITE_ORIGIN}{SITE_MEDIA}/ukraine-dreamzzz.jpeg"
     html = f"""
 {head_common(
         d,
@@ -2046,7 +2048,7 @@ def page_dream() -> None:
     )}
 {header_nav(d, "init-dream")}
   <main id="main" class="site-inner power-page dreamzzz-page">
-    <header class="power-hero power-hero--dreamzzz reveal" style="--power-hero-bg: url('{IMG}/images/ukraine-dreamzzz.jpeg')" aria-labelledby="dreamzzz-hero-title">
+    <header class="power-hero power-hero--dreamzzz reveal" style="--power-hero-bg: url('{SITE_MEDIA}/ukraine-dreamzzz.jpeg')" aria-labelledby="dreamzzz-hero-title">
       <div class="power-hero__noise" aria-hidden="true"></div>
       <div class="power-hero__accent power-hero__accent--dreamzzz" aria-hidden="true"></div>
       <div class="power-hero__veil power-hero__veil--dreamzzz" aria-hidden="true"></div>
@@ -2091,7 +2093,7 @@ def page_dream() -> None:
 
     <figure class="dreamzzz-figure reveal">
       <div class="dreamzzz-figure__frame">
-        <img src="{IMG}/images/ukraine-dreamzzz.jpeg" alt="Ukraine Dreamzzz athletes in training — boxing and combat sports development program supported by Go Ukraina" width="1200" height="750" loading="lazy" decoding="async" />
+        <img src="{SITE_MEDIA}/ukraine-dreamzzz.jpeg" alt="Ukraine Dreamzzz athletes in training — boxing and combat sports development program supported by Go Ukraina" width="1200" height="750" loading="lazy" decoding="async" />
       </div>
       <figcaption class="dreamzzz-figure__cap">Field energy: Ukraine Dreamzzz connects young athletes to coaching, housing, and competition opportunities.</figcaption>
     </figure>
@@ -2117,7 +2119,7 @@ def page_summit() -> None:
     d = 1
     title = "Ukraine Reconstruction Summit | Go Ukraina"
     desc = "The Ukrainian Reconstruction Summit brings together leaders, donors, and organizations to coordinate humanitarian aid and reconstruction efforts."
-    bi = f"{IMG}/images"
+    bi = SITE_MEDIA
     html = f"""
 {head_common(d, title, desc, "/summit")}
 {header_nav(d, "summit")}
@@ -2268,7 +2270,7 @@ def page_impact() -> None:
         ("partners/urs-logo.png", "Ukraine Reconstruction Summit"),
     ]
     pl = "".join(
-        f'<img src="{IMG}/images/{src}" alt="{html_lib.escape(alt)}" loading="lazy" width="200" height="80" />'
+        f'<img src="{SITE_MEDIA}/{src}" alt="{html_lib.escape(alt)}" loading="lazy" width="200" height="80" />'
         for src, alt in partners
     )
     html = f"""
@@ -2635,7 +2637,7 @@ def page_donate() -> None:
         "Make a tax-deductible gift to Go Ukraina. Support solar water stations, emergency power, "
         "and rebuilding programs for communities across Ukraine, with full transparency."
     )
-    bi = f"{IMG}/images"
+    bi = SITE_MEDIA
     html = f"""
 {head_common(d, title, desc, "/donate")}
 {header_nav(d, "donate")}

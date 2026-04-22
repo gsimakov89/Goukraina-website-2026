@@ -96,7 +96,7 @@ function generateRSS(posts) {
       const desc = p.excerpt || (p.seo && p.seo.meta_description) || "";
       const link = `${SITE_ORIGIN}/blog/${p.slug}/`;
       const pub = p.date ? new Date(p.date + "T12:00:00Z").toUTCString() : new Date().toUTCString();
-      const cover = p.cover ? `${SITE_ORIGIN}/images/${p.cover}` : "";
+      const cover = p.cover ? `${SITE_ORIGIN}/assets/img/${p.cover}` : "";
       const tags = Array.isArray(p.tags) ? p.tags.map((t) => `<category>${t}</category>`).join("") : "";
       return `  <item>
     <title><![CDATA[${p.title}]]></title>
@@ -118,7 +118,7 @@ function generateRSS(posts) {
     <language>en-us</language>
     <atom:link href="${SITE_ORIGIN}/blog/rss.xml" rel="self" type="application/rss+xml" />
     <image>
-      <url>${SITE_ORIGIN}/images/logo.png</url>
+      <url>${SITE_ORIGIN}/assets/img/logo.png</url>
       <title>Go Ukraina</title>
       <link>${SITE_ORIGIN}</link>
     </image>

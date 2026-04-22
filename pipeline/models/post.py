@@ -24,7 +24,7 @@ class SeoMeta:
 
     meta_title: str = ""
     meta_description: str = ""
-    og_image: str = ""  # absolute URL, site path (/…), or filename under /images/
+    og_image: str = ""  # absolute URL, site path (/…), or filename under /assets/img/
     og_image_alt: str = ""  # og:image:alt / twitter:image:alt when share image is set
 
     @classmethod
@@ -68,7 +68,7 @@ class BlogPost:
     read: int
     tags: tuple[str, ...]
     excerpt: str
-    cover: str  # relative under /images/ on the deployed site
+    cover: str  # relative under /assets/img/ on the deployed site
     body_html: str
     status: PostStatus
     seo: SeoMeta = field(default_factory=SeoMeta)
