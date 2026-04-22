@@ -10,6 +10,7 @@ import { MediaPage } from "@/pages/MediaPage";
 import { NavEditorPage } from "@/pages/NavEditorPage";
 import { OverviewPage } from "@/pages/OverviewPage";
 import { SeoPage } from "@/pages/SeoPage";
+import { IntegrationsPage } from "@/pages/IntegrationsPage";
 import { SiteSettingsPage } from "@/pages/SiteSettingsPage";
 
 /**
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="blog" element={<BlogListPage />} />
           <Route path="blog/:slug" element={<BlogEditorPage />} />
           <Route path="media" element={<MediaPage />} />
+          <Route path="integrations" element={<IntegrationsPage />} />
           <Route path="settings" element={<SiteSettingsPage />} />
           <Route path="seo" element={<SeoPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />

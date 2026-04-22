@@ -102,7 +102,8 @@
       const email = emailEl.value.trim();
 
       errEl.hidden = true;
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const em = email.trim().toLowerCase();
+      if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em) || em.length > 254) {
         errEl.textContent = "Please enter a valid email address.";
         errEl.hidden = false;
         emailEl.focus();
@@ -116,11 +117,15 @@
         const r = await fetch("/api/newsletter/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, source: "website_popup" }),
+          body: JSON.stringify({ email: em, source: "website_popup" }),
         });
         const json = await r.json();
         if (json.ok) {
           overlay.querySelector("#gu-nl-form-wrap").hidden = true;
+          const successSmall = overlay.querySelector("#gu-nl-success small");
+          if (successSmall && json.message) {
+            successSmall.textContent = json.message;
+          }
           overlay.querySelector("#gu-nl-success").hidden = false;
           dismiss();
           setTimeout(() => close(overlay), 3500);

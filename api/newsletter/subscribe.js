@@ -1,19 +1,33 @@
 /**
- * POST /api/newsletter/subscribe — forward subscriber to GoHighLevel (public endpoint)
+ * POST /api/newsletter/subscribe — validate email, dedupe, create Givebutter contact (public endpoint)
  * body: { email: string, name?: string, source?: string }
- * Reads GHL webhook URL from site_settings.newsletter_popup.ghl_webhook_url
+ *
+ * Requires GIVEBUTTER_API_KEY in Vercel env. Optional extra tags from site_settings.newsletter_popup.contact_tags
+ * (comma-separated, public-safe).
  */
 import { getSupabaseService } from "../_lib/admin_auth.mjs";
+import { getGivebutterApiKey } from "../_lib/ai_keys.mjs";
+import {
+  createGivebutterContact,
+  givebutterLooksLikeDuplicate,
+  isValidEmail,
+  normalizeEmail,
+} from "../_lib/newsletter_givebutter.mjs";
 
-const RATE_LIMIT = new Map(); // simple in-memory rate limit (resets per cold start)
+const RATE_LIMIT = new Map();
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
-    req.on("data", (c) => { data += c; });
+    req.on("data", (c) => {
+      data += c;
+    });
     req.on("end", () => {
-      try { resolve(data ? JSON.parse(data) : {}); }
-      catch (e) { reject(e); }
+      try {
+        resolve(data ? JSON.parse(data) : {});
+      } catch (e) {
+        reject(e);
+      }
     });
     req.on("error", reject);
   });
@@ -28,8 +42,14 @@ function getClientIp(req) {
   );
 }
 
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email));
+function parseExtraTagsFromSettings(value) {
+  if (!value || typeof value !== "object") return [];
+  const raw = String(value.contact_tags ?? "").trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
 }
 
 export default async function handler(req, res) {
@@ -43,11 +63,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Simple rate limit: 3 attempts per IP per minute
   const ip = getClientIp(req);
   const now = Date.now();
   const entry = RATE_LIMIT.get(ip) || { count: 0, window: now };
-  if (now - entry.window > 60000) { entry.count = 0; entry.window = now; }
+  if (now - entry.window > 60000) {
+    entry.count = 0;
+    entry.window = now;
+  }
   entry.count++;
   RATE_LIMIT.set(ip, entry);
   if (entry.count > 3) {
@@ -55,10 +77,13 @@ export default async function handler(req, res) {
   }
 
   let body;
-  try { body = await readJsonBody(req); }
-  catch { return res.status(400).json({ error: "Invalid request" }); }
+  try {
+    body = await readJsonBody(req);
+  } catch {
+    return res.status(400).json({ error: "Invalid request" });
+  }
 
-  const email = String(body.email || "").trim().toLowerCase();
+  const email = normalizeEmail(body.email);
   const name = String(body.name || "").trim().slice(0, 100);
   const source = String(body.source || "website_popup").trim().slice(0, 50);
 
@@ -66,54 +91,47 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Valid email address required." });
   }
 
-  // Fetch GHL webhook URL from settings
-  let ghlUrl = "";
+  const apiKey = (await getGivebutterApiKey()).trim();
+  if (!apiKey) {
+    console.warn("newsletter/subscribe: Givebutter API key not configured (Admin → Integrations or GIVEBUTTER_API_KEY)");
+    return res.status(200).json({ ok: true, message: "Subscribed successfully! Thank you." });
+  }
+
+  let extraTags = [];
   try {
     const sb = getSupabaseService();
-    const { data } = await sb
-      .from("site_settings")
-      .select("value")
-      .eq("key", "newsletter_popup")
-      .maybeSingle();
-    if (data?.value && typeof data.value === "object") {
-      ghlUrl = String(data.value.ghl_webhook_url || "").trim();
+    const { data } = await sb.from("site_settings").select("value").eq("key", "newsletter_popup").maybeSingle();
+    extraTags = parseExtraTagsFromSettings(data?.value);
+
+    const { error: insErr } = await sb.from("newsletter_signups").insert({ email, source });
+
+    if (insErr?.code === "23505") {
+      return res.status(200).json({
+        ok: true,
+        duplicate: true,
+        message: "You're already on our list. Thank you!",
+      });
     }
-  } catch {
-    // Fallback to env var
-    ghlUrl = (process.env.GHL_WEBHOOK_URL || "").trim();
-  }
-
-  if (!ghlUrl) {
-    // Don't expose the missing config — just silently succeed (allows testing without GHL)
-    console.warn("newsletter/subscribe: GHL webhook URL not configured");
-    return res.status(200).json({ ok: true, message: "Subscribed successfully! Thank you." });
-  }
-
-  try {
-    const payload = {
-      email,
-      name: name || email.split("@")[0],
-      source,
-      tags: ["website-newsletter", "go-ukraina"],
-      timestamp: new Date().toISOString(),
-    };
-
-    const r = await fetch(ghlUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!r.ok) {
-      const text = await r.text();
-      console.error("GHL webhook error:", r.status, text.slice(0, 200));
-      // Don't expose GHL errors to the user
-      return res.status(200).json({ ok: true, message: "Subscribed successfully! Thank you." });
+    if (insErr) {
+      console.error("newsletter_signups insert:", insErr.message);
+      return res.status(500).json({ error: "Could not save signup. Please try again." });
     }
 
-    return res.status(200).json({ ok: true, message: "Subscribed successfully! Thank you for joining us." });
+    const displayName = name || email.split("@")[0];
+    const gb = await createGivebutterContact(apiKey, { email, name: displayName, source, extraTags });
+
+    if (gb.ok || givebutterLooksLikeDuplicate(gb)) {
+      return res.status(200).json({
+        ok: true,
+        message: "Subscribed successfully! Thank you for joining us.",
+      });
+    }
+
+    await sb.from("newsletter_signups").delete().eq("email", email);
+    console.error("Givebutter contact error:", gb.status, (gb.text || "").slice(0, 300));
+    return res.status(502).json({ ok: false, error: "Could not complete signup. Please try again in a moment." });
   } catch (e) {
-    console.error("newsletter/subscribe fetch error:", e.message);
-    return res.status(200).json({ ok: true, message: "Subscribed successfully! Thank you." });
+    console.error("newsletter/subscribe:", e.message);
+    return res.status(500).json({ ok: false, error: "Something went wrong. Please try again." });
   }
 }

@@ -23,9 +23,10 @@ This repo is a **static site** (`public/` after build) plus **Node serverless fu
 
 | Name | Notes |
 |------|--------|
-| `OPENAI_API_KEY` | For `/api/ai/enrich` and `/api/ai/alt-image`. |
+| `OPENAI_API_KEY` | Optional override for AI admin routes. Keys can also be saved under **Admin → Integrations** (`site_settings.api_keys`). |
 | `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH` | Only if you still use **GitHub** for posts or media instead of Supabase-only. |
 | `VERCEL_DEPLOY_HOOK_URL` | Optional POST hook from `/api/redeploy`. |
+| `GIVEBUTTER_API_KEY` | Optional override for **newsletter → Givebutter**. Non-technical admins can instead paste the key under **Admin → Integrations** (stored in `site_settings.api_keys`). Also set on Edge Function `site-api` if traffic uses `VITE_SUPABASE_FUNCTIONS_URL`. |
 | `ADMIN_EMAIL_ALLOWLIST` | Optional comma-separated emails granted admin API access without `admin_users` / metadata (escape hatch; prefer a row in `public.admin_users`). |
 
 After changing env vars, **redeploy** (Deployments → … → Redeploy).

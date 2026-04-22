@@ -7,6 +7,7 @@ const nav = [
   { to: "/media", label: "Media" },
   { to: "/nav", label: "Navigation" },
   { to: "/author", label: "Author card" },
+  { to: "/integrations", label: "Integrations" },
   { to: "/settings", label: "Site & tracking" },
   { to: "/seo", label: "SEO tools" },
   { to: "/analytics", label: "Analytics" },

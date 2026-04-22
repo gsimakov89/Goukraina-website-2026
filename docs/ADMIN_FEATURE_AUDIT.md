@@ -11,7 +11,8 @@
 | Blog UX “extraordinary” / non-tech friendly | **Partial** | Solid Quill editor (headers, bold, lists, link, image, video, blockquote), SEO sidebar, AI buttons. Not yet at “work of art” polish; no guided first-run. |
 | Share buttons + SEO + LLM discovery | **Partial** | Meta/OG fields in editor; public templates must include them (verify per page). `llms.txt` / RSS via SEO tools API. No dedicated “share” row in editor UI. |
 | Author card around blog | **Partial** | `author_profiles` + Author page in admin; confirm public blog template renders card from same data. |
-| Newsletter popup + GoHighLevel | **Done (API)** | `public/assets/js/newsletter-popup.js`, `ghl_webhook_url` in `newsletter_popup` settings, `api/newsletter/subscribe.js`. |
+| Newsletter popup + Givebutter | **Done (API)** | `public/assets/js/newsletter-popup.js`, Givebutter key via **Admin → Integrations** or `GIVEBUTTER_API_KEY` env, optional `contact_tags` in `newsletter_popup`, `api/newsletter/subscribe.js`, dedupe `newsletter_signups`. |
+| Admin API keys (non-Supabase) | **Done** | **Admin → Integrations** → `site_settings.api_keys` (`givebutter_api_key`, `openai_api_key`). |
 | Static HTML public site (SEO-safe) | **Done** | Admin does not replace public HTML generation. |
 | OpenAI-assisted writer | **Partial** | `api/ai/enrich.js`, `api/ai/blog-assist.js`, `api/ai/seo-review.js` (OpenAI). **React admin wires enrich + SEO review only** — **blog-assist is not hooked in the UI.** |
 | Claude API | **Not done** | No Anthropic routes in repo; only OpenAI (`api/_lib/ai_keys.mjs`). |
@@ -41,7 +42,7 @@
 | Nav editor (DB) | `api/admin/nav.js` | **Public `build_site.py` nav is still hardcoded** — editor does not drive static header yet |
 | SEO tools | `api/admin/seo-tools.js` | |
 | GA4 + sitemap ping | `api/admin/analytics.js` | |
-| Newsletter → GHL | `api/newsletter/subscribe.js` | |
+| Newsletter → Givebutter | `api/newsletter/subscribe.js` | |
 | Newsletter popup (public) | `public/assets/js/newsletter-popup.js` | |
 | Import local posts | `api/admin/import-local-posts.js` | |
 

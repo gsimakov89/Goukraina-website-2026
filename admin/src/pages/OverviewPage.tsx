@@ -26,6 +26,12 @@ const cards = [
     accent: "from-[oklch(96%_0.03_200)] to-[oklch(99%_0.01_250)]",
   },
   {
+    title: "Integrations",
+    body: "Givebutter, OpenAI, and other API keys—paste once here instead of editing hosting config.",
+    to: "/integrations",
+    accent: "from-[oklch(96%_0.04_200)] to-[oklch(99%_0.01_250)]",
+  },
+  {
     title: "Site & tracking",
     body: "Analytics tags (GTM, Meta), email popup text, and optional head snippets—all saved to the database.",
     to: "/settings",
@@ -57,8 +63,9 @@ export function OverviewPage() {
           stored in the database and baked into the public site when it rebuilds.
         </p>
         <p className="mt-3 max-w-2xl text-sm text-[oklch(45%_0.03_260)]">
-          <strong className="font-medium text-[oklch(32%_0.03_260)]">Site & tracking</strong> (under the
-          sidebar) is where you set Google Tag Manager, Meta Pixel, the email signup popup, and optional scripts.
+          Use <strong className="font-medium text-[oklch(32%_0.03_260)]">Integrations</strong> for Givebutter and OpenAI
+          keys, and <strong className="font-medium text-[oklch(32%_0.03_260)]">Site &amp; tracking</strong> for Google Tag
+          Manager, Meta Pixel, the email popup copy, and optional scripts.
         </p>
       </header>
       <div className="grid gap-5 sm:grid-cols-2">

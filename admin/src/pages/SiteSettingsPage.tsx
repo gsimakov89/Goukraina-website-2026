@@ -14,7 +14,8 @@ type NewsletterPopupValue = {
   body_text: string;
   button_text: string;
   success_text: string;
-  ghl_webhook_url: string;
+  /** Comma-separated extra Givebutter contact tags (optional). */
+  contact_tags: string;
 };
 
 function normalizeTracking(raw: unknown): TrackingValue {
@@ -55,7 +56,7 @@ function normalizeNewsletter(raw: unknown): NewsletterPopupValue {
       body_text: "",
       button_text: "",
       success_text: "",
-      ghl_webhook_url: "",
+      contact_tags: "",
     };
   }
   const o = raw as Record<string, unknown>;
@@ -66,7 +67,7 @@ function normalizeNewsletter(raw: unknown): NewsletterPopupValue {
     body_text: String(o.body_text ?? "").trim(),
     button_text: String(o.button_text ?? "").trim(),
     success_text: String(o.success_text ?? "").trim(),
-    ghl_webhook_url: String(o.ghl_webhook_url ?? "").trim(),
+    contact_tags: String(o.contact_tags ?? "").trim(),
   };
 }
 
@@ -248,7 +249,7 @@ export function SiteSettingsPage() {
       body_text: nl.body_text.trim() || NL_DEFAULTS.body,
       button_text: nl.button_text.trim() || NL_DEFAULTS.button,
       success_text: nl.success_text.trim() || NL_DEFAULTS.success,
-      ghl_webhook_url: nl.ghl_webhook_url.trim(),
+      contact_tags: nl.contact_tags.trim(),
     };
 
     const putRes = await api("/api/admin/settings", {
@@ -405,8 +406,11 @@ export function SiteSettingsPage() {
 
       <h3 className="mt-14 font-serif text-xl font-semibold tracking-tight">Email signup popup</h3>
       <p className="mt-2 max-w-2xl text-sm text-[oklch(42%_0.03_260)]">
-        Edit the message visitors see, then check the preview. Use the tabs to switch between the signup form and the
-        thank-you screen. Submissions use your GoHighLevel webhook below.
+        Edit the message visitors see, then check the preview. Submissions are validated, deduplicated, and synced to
+        Givebutter contacts. Add the Givebutter API key under{" "}
+        <strong className="font-medium text-[oklch(32%_0.03_260)]">Integrations</strong> in the sidebar (or set{" "}
+        <code className="rounded bg-[oklch(96%_0.02_250)] px-1">GIVEBUTTER_API_KEY</code> on the host if your team prefers
+        that).
       </p>
 
       <form onSubmit={saveNewsletter} className="mt-8">
@@ -522,18 +526,19 @@ export function SiteSettingsPage() {
 
                   <details className="rounded-xl border border-[oklch(88%_0.02_250)] bg-white px-4 py-3">
                     <summary className="cursor-pointer text-sm font-medium text-[oklch(32%_0.03_260)]">
-                      GoHighLevel connection
+                      Givebutter tags (optional)
                     </summary>
                     <p className="mt-2 text-xs text-[oklch(45%_0.03_260)]">
-                      Paste your inbound webhook so signups reach your CRM (GHL → Automation → Inbound Webhook).
+                      Extra contact tags in addition to <span className="font-mono">website-newsletter</span> and{" "}
+                      <span className="font-mono">go-ukraina</span>. Comma-separated, max 64 characters per tag.
                     </p>
                     <input
-                      type="url"
-                      value={nl.ghl_webhook_url}
-                      onChange={(e) => patchNl({ ghl_webhook_url: e.target.value })}
-                      placeholder="https://…"
+                      type="text"
+                      value={nl.contact_tags}
+                      onChange={(e) => patchNl({ contact_tags: e.target.value })}
+                      placeholder="e.g. popup-2026, homepage"
                       autoComplete="off"
-                      className="mt-3 w-full rounded-xl border border-[oklch(88%_0.02_250)] bg-[oklch(99%_0.01_250)] px-3 py-2.5 font-mono text-xs text-[oklch(22%_0.03_260)]"
+                      className="mt-3 w-full rounded-xl border border-[oklch(88%_0.02_250)] bg-[oklch(99%_0.01_250)] px-3 py-2.5 text-sm text-[oklch(22%_0.03_260)]"
                     />
                   </details>
                 </div>
