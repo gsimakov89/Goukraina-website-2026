@@ -3018,6 +3018,7 @@ def write_seo_files() -> None:
 def copy_admin_ui_to_public() -> None:
     """Build the Vite + React admin into public/admin/ (same origin as /api/*)."""
     import subprocess
+    import sys
 
     admin_dir = ROOT / "admin"
     if not (admin_dir / "package.json").is_file():
@@ -3025,9 +3026,14 @@ def copy_admin_ui_to_public() -> None:
     try:
         subprocess.run(["npm", "run", "build"], cwd=str(admin_dir), check=True)
     except FileNotFoundError:
-        print("WARN: npm not found; skip admin SPA build. Install Node or run: cd admin && npm run build")
+        print(
+            "ERROR: npm not found; admin SPA not built. Install Node or run: cd admin && npm run build",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from None
     except subprocess.CalledProcessError as e:
-        print("WARN: admin SPA build failed:", e)
+        print("ERROR: admin SPA build failed (fix admin/ then rebuild):", e, file=sys.stderr)
+        raise SystemExit(1) from None
 
 
 def main() -> None:

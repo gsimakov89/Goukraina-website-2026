@@ -78,8 +78,16 @@ export function LoginPage() {
         )}
         {!configured && ready && (
           <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
-            Server missing <code className="rounded bg-red-100 px-1">SUPABASE_ANON_KEY</code>. Configure Vercel or
-            local env.
+            {bootErr ? (
+              bootErr
+            ) : (
+              <>
+                Supabase client config failed. Set <code className="rounded bg-red-100 px-1">SUPABASE_URL</code> and{" "}
+                <code className="rounded bg-red-100 px-1">SUPABASE_ANON_KEY</code> on the server (Vercel env or Edge
+                secrets if you use <code className="rounded bg-red-100 px-1">VITE_SUPABASE_FUNCTIONS_URL</code>), then
+                redeploy.
+              </>
+            )}
           </p>
         )}
         <form onSubmit={onSubmit} className="flex flex-col gap-4">

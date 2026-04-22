@@ -55,6 +55,15 @@ for (const cmd of candidates) {
     }
     walk(imgDir);
     console.log(`run_build_site: public/assets/img has ${n} file(s) (Vercel should deploy these with outputDirectory public).`);
+    const adminIndex = path.join(root, "public", "admin", "index.html");
+    if (!fs.existsSync(adminIndex)) {
+      console.error(
+        "run_build_site: missing",
+        adminIndex,
+        "— admin Vite build did not run or failed (see build log above)."
+      );
+      process.exit(1);
+    }
   }
   process.exit(result.status === null ? 1 : result.status);
 }

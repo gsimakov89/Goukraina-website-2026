@@ -3,15 +3,20 @@ import { json, readJsonBody } from "./http.ts";
 
 const SUPABASE_PROJECT_URL_DEFAULT = "https://lrbrvkhddhuebmyazgcf.supabase.co";
 
+const SETUP_HINT =
+  "Set SUPABASE_URL and SUPABASE_ANON_KEY on this Edge Function (site-api) secrets, or use same-origin /api on Vercel without VITE_SUPABASE_FUNCTIONS_URL.";
+
 export async function handleSupabasePublicConfig(_req: Request): Promise<Response> {
   const url = (Deno.env.get("SUPABASE_URL") || "").trim() || SUPABASE_PROJECT_URL_DEFAULT;
   const anonKey = (Deno.env.get("SUPABASE_ANON_KEY") || "").trim();
   const fromSb = Boolean((Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "").trim());
+  const configured = Boolean(url && anonKey);
   return json({
-    configured: Boolean(url && anonKey),
+    configured,
     url,
-    anonKey,
+    anonKey: configured ? anonKey : "",
     blogPostsSource: fromSb ? "supabase" : "json",
+    ...(configured ? {} : { setupHint: SETUP_HINT }),
   });
 }
 
