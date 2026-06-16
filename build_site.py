@@ -1724,22 +1724,22 @@ def page_about() -> None:
         </article>
         <article class="about-team-card">
           <div class="about-team-card__media">
-            <img src="{SITE_MEDIA}/adrien-tompert.jpg" alt="Portrait of Adrien Tompert" width="400" height="400" loading="lazy" decoding="async" />
-          </div>
-          <div class="about-team-card__body">
-            <h3 class="about-team-card__name">Adrien Tompert</h3>
-            <p class="about-team-card__role">Program Development Associate</p>
-            <p class="about-team-card__bio">A driven aspiring healthcare professional who has traveled to Ukraine to directly support humanitarian initiatives and fundraising efforts.</p>
-          </div>
-        </article>
-        <article class="about-team-card">
-          <div class="about-team-card__media">
             <img src="{SITE_MEDIA}/nikol-bohach.png" alt="Portrait of Nikol Bohach" width="400" height="400" loading="lazy" decoding="async" />
           </div>
           <div class="about-team-card__body">
             <h3 class="about-team-card__name">Nikol Bohach</h3>
             <p class="about-team-card__role">Co-founder</p>
             <p class="about-team-card__bio">Exemplifying the spirit of service and commitment to international solidarity, coordinating Go Ukraina&apos;s operations.</p>
+          </div>
+        </article>
+        <article class="about-team-card">
+          <div class="about-team-card__media">
+            <img src="{SITE_MEDIA}/adrien-tompert.jpg" alt="Portrait of Adrien Tompert" width="400" height="400" loading="lazy" decoding="async" />
+          </div>
+          <div class="about-team-card__body">
+            <h3 class="about-team-card__name">Adrien Tompert</h3>
+            <p class="about-team-card__role">Program Development Associate</p>
+            <p class="about-team-card__bio">A driven aspiring healthcare professional who has traveled to Ukraine to directly support humanitarian initiatives and fundraising efforts.</p>
           </div>
         </article>
       </div>
